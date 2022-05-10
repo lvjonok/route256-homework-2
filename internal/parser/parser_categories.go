@@ -2,6 +2,7 @@ package parser
 
 import (
 	"fmt"
+	"net/http"
 	"strconv"
 
 	"golang.org/x/net/html"
@@ -13,7 +14,17 @@ type ProblemCategory struct {
 	Title      string
 }
 
-func ParseCategories(tokenizer *html.Tokenizer) ([]*ProblemCategory, error) {
+func ParseCategories() ([]*ProblemCategory, error) {
+	url := "https://ege.sdamgia.ru/prob_catalog"
+
+	resp, err := http.Get(url)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	tokenizer := html.NewTokenizer(resp.Body)
+
 	categories := []*ProblemCategory{}
 
 	// in parsed website each category follows

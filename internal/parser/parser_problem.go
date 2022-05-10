@@ -97,7 +97,7 @@ func isProblemId(tokens []html.Token) (bool, error) {
 	return false, nil
 }
 
-func ParseProblem(problemId int, output chan<- *ProblemWError) {
+func ParseProblem(problemId int) (*Problem, error) {
 	url := fmt.Sprintf("https://ege.sdamgia.ru/problem?id=%d", problemId)
 	resp, err := http.Get(url)
 	if err != nil {
@@ -122,13 +122,13 @@ out:
 		case tt == html.TextToken:
 			if tokens[len(tokens)-1].Data == "i" {
 				problem.AddPart(curToken.Data)
-				fmt.Printf("I tag %#v\n", curToken)
+				// fmt.Printf("I tag %#v\n", curToken)
 				continue
 			}
 
 			if tokens[len(tokens)-1].Data == "sup" {
 				problem.AddPart("^" + curToken.Data)
-				fmt.Printf("sup tag %#v\n", curToken)
+				// fmt.Printf("sup tag %#v\n", curToken)
 				continue
 			}
 
@@ -148,8 +148,7 @@ out:
 			if problem.Answer == "" && !seenAnswerLabel {
 				res, err := isProblemDescription(tokens)
 				if err != nil {
-					output <- &ProblemWError{Problem: &problem, Error: err}
-					return
+					return &problem, err
 				}
 
 				if res {
@@ -161,8 +160,7 @@ out:
 
 			res, err := isProblemAnswer(tokens)
 			if err != nil {
-				output <- &ProblemWError{Problem: &problem, Error: err}
-				return
+				return &problem, err
 			}
 			// if res || strings.TrimSpace(curToken.Data) != "" && strings.Contains(curToken.Data, ": -4.") {
 			// 	fmt.Printf("found answer %v\n", curToken)
@@ -202,8 +200,7 @@ out:
 			if curToken.Data == "img" {
 				res, err := isImageDescr(tokens)
 				if err != nil {
-					output <- &ProblemWError{Problem: &problem, Error: err}
-					return
+					return &problem, err
 				}
 
 				if !res {
@@ -216,8 +213,7 @@ out:
 				}
 				// fmt.Printf("try descr %#v\n", curToken)
 				if err != nil {
-					output <- &ProblemWError{Problem: &problem, Error: fmt.Errorf("image has no src: %v err: %v", curToken, err)}
-					return
+					return &problem, fmt.Errorf("image has no src: %v err: %v", curToken, err)
 				} else if !seenAnswerLabel {
 					problem.Parts = append(problem.Parts, imgSrc)
 					// fmt.Printf("added new image %v\n", imgSrc)
@@ -233,14 +229,13 @@ out:
 
 			res, err := isImageProblem(tokens)
 			if err != nil {
-				output <- &ProblemWError{Problem: &problem, Error: err}
-				return
+				return &problem, err
 			}
 
 			if res {
 				imgSrc, err := getAttrToken(&curToken, "src")
 				if err != nil {
-					output <- &ProblemWError{Problem: &problem, Error: fmt.Errorf("image has no src: %v err: %v", curToken, err)}
+					return &problem, fmt.Errorf("image has no src: %v err: %v", curToken, err)
 				} else {
 					problem.ProblemImage = problemImageBaseUrl + imgSrc
 				}
@@ -248,7 +243,7 @@ out:
 		}
 	}
 
-	output <- &ProblemWError{Problem: &problem, Error: nil}
+	return &problem, nil
 }
 
 func isProblemAnswer(tokens []html.Token) (bool, error) {
