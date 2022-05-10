@@ -7,14 +7,12 @@ import (
 )
 
 func (c client) CreateProblem(ctx context.Context, problem m.Problem) error {
-
-	const query = `insert into problems(id, category_id, task_number, image, parts, answer) 
-	VALUES ($1, $2, $3, $4, $5, $6);`
+	const query = `insert into problems(id, category_id, image, parts, answer) 
+	VALUES ($1, $2, $3, $4, $5) ON CONFLICT(id) DO UPDATE set image=$3, parts=$4, answer=$5`
 
 	_, err := c.pool.Exec(ctx, query,
 		problem.ProblemID,
 		problem.CategoryID,
-		problem.TaskNumber,
 		problem.ProblemImage,
 		problem.Parts,
 		problem.Answer,

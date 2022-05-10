@@ -8,12 +8,17 @@ import (
 )
 
 func (c client) GetProblemByTaskNumber(ctx context.Context, taskNumber int) (*m.Problem, error) {
-	const query = `select id, category_id, task_number, image, parts, answer from problems where task_number=$1 ORDER by random() LIMIT 1;`
+	const query = `SELECT p.id, p.category_id, p.image, p.parts, p.answer
+		FROM problems p
+						JOIN categories c ON p.category_id = c.id
+		WHERE c.task_number = $1
+		ORDER BY RANDOM()
+		LIMIT 1;`
 
 	p := m.Problem{}
 
 	err := c.pool.QueryRow(ctx, query, taskNumber).
-		Scan(&p.ProblemID, &p.CategoryID, &p.TaskNumber, &p.ProblemImage, &p.Parts, &p.Answer)
+		Scan(&p.ProblemID, &p.CategoryID, &p.ProblemImage, &p.Parts, &p.Answer)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get problem from database, err: %v", err)
 	}

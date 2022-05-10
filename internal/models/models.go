@@ -1,7 +1,5 @@
 package models
 
-import "time"
-
 type ID int
 
 // Corresponds to submission result
@@ -17,16 +15,24 @@ const (
 type Problem struct {
 	ProblemID    ID
 	CategoryID   ID
-	TaskNumber   int // 1-11
 	ProblemImage string
 	Parts        []string
 	Answer       string
 }
 
-type Submission struct {
-	ChatID    ID
-	ProblemID ID
-	Result    Result
-	CreatedAt time.Time
-	UpdatedAt time.Time
+type Category struct {
+	CategoryID ID
+	TaskNumber int
+	Title      string
 }
+
+type Submission struct {
+	SubmissionID ID
+	ChatID       ID
+	ProblemID    ID
+	Result       Result
+	// CreatedAt    time.Time
+	// UpdatedAt    time.Time
+}
+
+// TODO: add hashed images
