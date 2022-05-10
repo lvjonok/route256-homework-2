@@ -3,6 +3,7 @@ package app
 import (
 	"context"
 
+	"gitlab.ozon.dev/lvjonok/homework-2/internal/models"
 	pb "gitlab.ozon.dev/lvjonok/homework-2/pkg/api"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -16,6 +17,17 @@ func (s service) GetProblem(ctx context.Context, req *pb.GetProblemRequest) (*pb
 	problem, err := s.DB.GetProblemByTaskNumber(ctx, int(req.TaskNumber))
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "failed to get problem by task number, err: %v", err)
+	}
+
+	if err := s.DB.UpdateAbortedSubmissions(ctx, models.ID(req.ChatId)); err != nil {
+		return nil, status.Errorf(codes.Internal, "failed to abort pending subs of user: %v, err: %v", req.ChatId, err)
+	}
+
+	if _, err := s.DB.CreateSubmission(ctx, models.Submission{
+		ChatID:    models.ID(req.ChatId),
+		ProblemID: problem.ProblemID,
+	}); err != nil {
+		return nil, status.Errorf(codes.Internal, "failed to create submission, err: %v", err)
 	}
 
 	return &pb.GetProblemResponse{Problem: &pb.Problem{

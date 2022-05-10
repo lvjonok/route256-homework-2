@@ -20,12 +20,20 @@ func (s *service) ParseProblems(ctx context.Context, req *pb.ParseProblemsReques
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "failed to parse categories of problems: %v", err)
 	}
+
 	problemsChan := make(chan *models.Problem)
 
 	var wg sync.WaitGroup
 
 	for _, cat := range categories {
-		// log.Printf("%v", cat)
+		if err := s.DB.CreateCategory(ctx, models.Category{
+			CategoryID: models.ID(cat.CategotyId),
+			TaskNumber: cat.Problem,
+			Title:      cat.Title,
+		}); err != nil {
+			log.Printf("failed to create category, err: %v", err)
+			continue
+		}
 
 		wg.Add(1)
 		go func(cat *parser.ProblemCategory) {
@@ -50,7 +58,6 @@ func (s *service) ParseProblems(ctx context.Context, req *pb.ParseProblemsReques
 						problemsChan <- &models.Problem{
 							ProblemID:    models.ID(problem.ProblemId),
 							CategoryID:   models.ID(cat.CategotyId),
-							TaskNumber:   cat.Problem,
 							ProblemImage: problem.ProblemImage,
 							Parts:        problem.Parts,
 							Answer:       problem.Answer,

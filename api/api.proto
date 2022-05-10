@@ -1,0 +1,88 @@
+syntax = "proto3";
+
+option go_package = "gitlab.ozon.dev/lvjonok/homework-2";
+
+package api;
+
+message Problem {
+  int64 problem_id = 1;
+  string image = 2;
+  repeated string description = 3;
+};
+
+message CheckAnswerRequest {
+  int64 chat_id = 1;
+  string answer = 2;
+};
+
+enum SubmitResult {
+  CORRECT = 0;
+  WRONG = 1;
+};
+
+message CheckAnswerResponse {
+  int64 problem_id = 1;
+  string answer = 2;
+  SubmitResult result = 3;
+};
+
+message GetRandomRequest {
+  int64 chat_id = 1;
+};
+
+message GetRandomResponse {
+  int64 task_number = 1;
+  Problem problem = 2;
+};
+
+message GetProblemRequest {
+  int64 chat_id = 1;
+  int64 task_number = 2;
+};
+
+message GetProblemResponse {
+  Problem problem = 1;
+}; 
+
+message GetStatRequest {
+  int64 chat_id = 1;
+};
+
+message TaskStat {
+  int64 correct = 1;
+  int64 all = 2;
+};
+
+message GetStatResponse {
+  repeated TaskStat stat = 1;
+};
+
+enum TimePeriod {
+  TODAY = 0;
+  ALL_TIME = 1;
+};
+
+message GetRatingRequest {
+  int64 chat_id = 1;
+  TimePeriod period = 2;
+};
+
+message GetRatingResponse {
+  int64 position = 1;
+  int64 all = 2;
+};
+
+message ParseProblemsRequest {
+  int64 chat_id = 1;
+};
+
+message ParseProblemsResponse {};
+
+service MathHelper {
+  rpc ParseProblems (ParseProblemsRequest) returns (ParseProblemsResponse);
+  rpc GetRating (GetRatingRequest) returns (GetRatingResponse);
+  rpc GetStat (GetStatRequest) returns (GetStatResponse);
+  rpc CheckAnswer (CheckAnswerRequest) returns (CheckAnswerResponse);
+  rpc GetRandom (GetRandomRequest) returns (GetRandomResponse);
+  rpc GetProblem (GetProblemRequest) returns (GetProblemResponse);
+};
