@@ -6,6 +6,7 @@ import (
 	"log"
 	"strconv"
 
+	"gitlab.ozon.dev/lvjonok/homework-2/internal/config"
 	"gitlab.ozon.dev/lvjonok/homework-2/internal/tg"
 	homework_2 "gitlab.ozon.dev/lvjonok/homework-2/pkg/api"
 	"google.golang.org/grpc"
@@ -13,7 +14,12 @@ import (
 )
 
 func main() {
-	conn, err := grpc.Dial(":8080", grpc.WithTransportCredentials(insecure.NewCredentials()))
+	cfg, err := config.New("config.yaml")
+	if err != nil {
+		panic(err)
+	}
+
+	conn, err := grpc.Dial(cfg.Server.Host+":"+cfg.Server.Port, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		panic(err)
 	}
@@ -21,7 +27,7 @@ func main() {
 
 	ctx := context.Background()
 	client := homework_2.NewMathHelperClient(conn)
-	tgClient := tg.New("5142134345:AAEZGVL8ex0egRKFTl19KGygRPbQFh3AsGM")
+	tgClient := tg.New(cfg.Telegram.BotAPI)
 
 	for update := range tgClient.GetUpdatesChan() {
 		chatID := update.Message.Chat.ID

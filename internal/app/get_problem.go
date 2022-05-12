@@ -9,7 +9,7 @@ import (
 	"google.golang.org/grpc/status"
 )
 
-func (s service) GetProblem(ctx context.Context, req *pb.GetProblemRequest) (*pb.GetProblemResponse, error) {
+func (s *Service) GetProblem(ctx context.Context, req *pb.GetProblemRequest) (*pb.GetProblemResponse, error) {
 	if req.TaskNumber < 1 || req.TaskNumber > 11 {
 		return nil, status.Error(codes.OutOfRange, "wrong task number, only [1, 11] are allowed")
 	}

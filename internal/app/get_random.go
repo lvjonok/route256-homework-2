@@ -10,7 +10,7 @@ import (
 	"google.golang.org/grpc/status"
 )
 
-func (s *service) GetRandom(ctx context.Context, req *pb.GetRandomRequest) (*pb.GetRandomResponse, error) {
+func (s *Service) GetRandom(ctx context.Context, req *pb.GetRandomRequest) (*pb.GetRandomResponse, error) {
 	randTaskNumber := rand.Intn(10) + 1
 
 	p, err := s.DB.GetProblemByTaskNumber(ctx, randTaskNumber)

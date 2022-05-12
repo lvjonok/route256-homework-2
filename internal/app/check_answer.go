@@ -10,7 +10,7 @@ import (
 	"google.golang.org/grpc/status"
 )
 
-func (s service) CheckAnswer(ctx context.Context, req *pb.CheckAnswerRequest) (*pb.CheckAnswerResponse, error) {
+func (s *Service) CheckAnswer(ctx context.Context, req *pb.CheckAnswerRequest) (*pb.CheckAnswerResponse, error) {
 	lastUserSub, err := s.DB.GetLastUserSubmission(ctx, models.ID(req.ChatId))
 	if err == db.ErrNotFound {
 		return nil, status.Error(codes.NotFound, "cannot check answer without queried problem")

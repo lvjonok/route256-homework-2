@@ -7,18 +7,17 @@ import (
 
 	"gitlab.ozon.dev/lvjonok/homework-2/internal/models"
 	"gitlab.ozon.dev/lvjonok/homework-2/internal/parser"
-	pb "gitlab.ozon.dev/lvjonok/homework-2/pkg/api"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
 
-func (s *service) ParseProblems(ctx context.Context, req *pb.ParseProblemsRequest) (*pb.ParseProblemsResponse, error) {
+func (s *Service) ParseProblems(ctx context.Context) error {
 
 	// start parser
 
 	categories, err := parser.ParseCategories()
 	if err != nil {
-		return nil, status.Errorf(codes.Internal, "failed to parse categories of problems: %v", err)
+		return status.Errorf(codes.Internal, "failed to parse categories of problems: %v", err)
 	}
 
 	problemsChan := make(chan *models.Problem)
@@ -81,5 +80,5 @@ func (s *service) ParseProblems(ctx context.Context, req *pb.ParseProblemsReques
 		}
 	}
 
-	return &pb.ParseProblemsResponse{}, nil
+	return nil
 }

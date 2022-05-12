@@ -8,7 +8,7 @@ import (
 	"google.golang.org/grpc/status"
 )
 
-func (s service) GetStat(ctx context.Context, req *pb.GetStatRequest) (*pb.GetStatResponse, error) {
+func (s Service) GetStat(ctx context.Context, req *pb.GetStatRequest) (*pb.GetStatResponse, error) {
 
 	return nil, status.Error(codes.Unimplemented, "")
 }

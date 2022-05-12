@@ -22,7 +22,7 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type MathHelperClient interface {
-	ParseProblems(ctx context.Context, in *ParseProblemsRequest, opts ...grpc.CallOption) (*ParseProblemsResponse, error)
+	// rpc ParseProblems (ParseProblemsRequest) returns (ParseProblemsResponse);
 	GetRating(ctx context.Context, in *GetRatingRequest, opts ...grpc.CallOption) (*GetRatingResponse, error)
 	GetStat(ctx context.Context, in *GetStatRequest, opts ...grpc.CallOption) (*GetStatResponse, error)
 	CheckAnswer(ctx context.Context, in *CheckAnswerRequest, opts ...grpc.CallOption) (*CheckAnswerResponse, error)
@@ -36,15 +36,6 @@ type mathHelperClient struct {
 
 func NewMathHelperClient(cc grpc.ClientConnInterface) MathHelperClient {
 	return &mathHelperClient{cc}
-}
-
-func (c *mathHelperClient) ParseProblems(ctx context.Context, in *ParseProblemsRequest, opts ...grpc.CallOption) (*ParseProblemsResponse, error) {
-	out := new(ParseProblemsResponse)
-	err := c.cc.Invoke(ctx, "/api.MathHelper/ParseProblems", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
 }
 
 func (c *mathHelperClient) GetRating(ctx context.Context, in *GetRatingRequest, opts ...grpc.CallOption) (*GetRatingResponse, error) {
@@ -96,7 +87,7 @@ func (c *mathHelperClient) GetProblem(ctx context.Context, in *GetProblemRequest
 // All implementations must embed UnimplementedMathHelperServer
 // for forward compatibility
 type MathHelperServer interface {
-	ParseProblems(context.Context, *ParseProblemsRequest) (*ParseProblemsResponse, error)
+	// rpc ParseProblems (ParseProblemsRequest) returns (ParseProblemsResponse);
 	GetRating(context.Context, *GetRatingRequest) (*GetRatingResponse, error)
 	GetStat(context.Context, *GetStatRequest) (*GetStatResponse, error)
 	CheckAnswer(context.Context, *CheckAnswerRequest) (*CheckAnswerResponse, error)
@@ -109,9 +100,6 @@ type MathHelperServer interface {
 type UnimplementedMathHelperServer struct {
 }
 
-func (UnimplementedMathHelperServer) ParseProblems(context.Context, *ParseProblemsRequest) (*ParseProblemsResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method ParseProblems not implemented")
-}
 func (UnimplementedMathHelperServer) GetRating(context.Context, *GetRatingRequest) (*GetRatingResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetRating not implemented")
 }
@@ -138,24 +126,6 @@ type UnsafeMathHelperServer interface {
 
 func RegisterMathHelperServer(s grpc.ServiceRegistrar, srv MathHelperServer) {
 	s.RegisterService(&MathHelper_ServiceDesc, srv)
-}
-
-func _MathHelper_ParseProblems_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ParseProblemsRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(MathHelperServer).ParseProblems(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/api.MathHelper/ParseProblems",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(MathHelperServer).ParseProblems(ctx, req.(*ParseProblemsRequest))
-	}
-	return interceptor(ctx, in, info, handler)
 }
 
 func _MathHelper_GetRating_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
@@ -255,10 +225,6 @@ var MathHelper_ServiceDesc = grpc.ServiceDesc{
 	ServiceName: "api.MathHelper",
 	HandlerType: (*MathHelperServer)(nil),
 	Methods: []grpc.MethodDesc{
-		{
-			MethodName: "ParseProblems",
-			Handler:    _MathHelper_ParseProblems_Handler,
-		},
 		{
 			MethodName: "GetRating",
 			Handler:    _MathHelper_GetRating_Handler,

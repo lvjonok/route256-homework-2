@@ -79,7 +79,7 @@ message ParseProblemsRequest {
 message ParseProblemsResponse {};
 
 service MathHelper {
-  rpc ParseProblems (ParseProblemsRequest) returns (ParseProblemsResponse);
+  // rpc ParseProblems (ParseProblemsRequest) returns (ParseProblemsResponse);
   rpc GetRating (GetRatingRequest) returns (GetRatingResponse);
   rpc GetStat (GetStatRequest) returns (GetStatResponse);
   rpc CheckAnswer (CheckAnswerRequest) returns (CheckAnswerResponse);
