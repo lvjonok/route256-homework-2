@@ -13,14 +13,16 @@ const (
 )
 
 type Problem struct {
-	ProblemID    ID
-	CategoryID   ID
+	ID           ID
+	ProblemID    ID // id from reshuege.ru
+	CategoryID   ID // foreign key from Category.ID
 	ProblemImage string
 	Parts        []string
 	Answer       string
 }
 
 type Category struct {
+	ID         ID
 	CategoryID ID
 	TaskNumber int
 	Title      string
@@ -29,10 +31,8 @@ type Category struct {
 type Submission struct {
 	SubmissionID ID
 	ChatID       ID
-	ProblemID    ID
+	ProblemID    ID // foreign key from Problem.ID
 	Result       Result
 	// CreatedAt    time.Time
 	// UpdatedAt    time.Time
 }
-
-// TODO: add hashed images
