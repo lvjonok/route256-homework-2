@@ -18,11 +18,29 @@ type Problem struct {
 }
 
 func (p *Problem) AddPart(el string) {
-	if len(p.Parts) != 0 && !isLink(p.Parts[len(p.Parts)-1]) {
-		p.Parts[len(p.Parts)-1] += el
+	el = strings.ReplaceAll(el, "\u202f", " ")
+	el = strings.ReplaceAll(el, "\u2009", " ")
+	el = strings.TrimSpace(el)
+
+	if len(p.Parts) != 0 && !isLink(p.Parts[len(p.Parts)-1]) && !isLink(el) {
+		extra := " "
+		if el == "." || el == "," {
+			extra = ""
+		}
+
+		p.Parts[len(p.Parts)-1] += extra + el
 	} else {
 		p.Parts = append(p.Parts, el)
 	}
+}
+
+func (p *Problem) AddAnswer(el string) {
+	el = strings.TrimSpace(el)
+	el = strings.TrimPrefix(el, "Ответ:")
+	el = strings.TrimSuffix(el, ".")
+	el = strings.TrimSpace(el)
+
+	p.Answer = el
 }
 
 const problemImageBaseUrl string = "https://ege.sdamgia.ru"
@@ -98,7 +116,7 @@ func isProblemId(tokens []html.Token) (bool, error) {
 }
 
 func ParseProblem(problemId int) (*Problem, error) {
-	url := fmt.Sprintf("https://ege.sdamgia.ru/problem?id=%d", problemId)
+	url := fmt.Sprintf("https://ege.sdamgia.ru/problem?id=%d&print=true", problemId)
 	resp, err := http.Get(url)
 	if err != nil {
 		log.Fatal("posos", err)
@@ -108,137 +126,38 @@ func ParseProblem(problemId int) (*Problem, error) {
 
 	problem := Problem{ProblemId: problemId, ProblemImage: "", Parts: []string{}, Answer: ""}
 
-	seenAnswerLabel := false
-
 	tokens := []html.Token{}
 
 out:
 	for {
 		tt := tokenizer.Next()
 		curToken := tokenizer.Token()
+		// log.Printf("token: %#v", curToken)
 		switch {
 		case tt == html.ErrorToken:
 			break out
 		case tt == html.TextToken:
-			if tokens[len(tokens)-1].Data == "i" {
+			if isDescription(tokens) {
 				problem.AddPart(curToken.Data)
-				// fmt.Printf("I tag %#v\n", curToken)
-				continue
 			}
 
-			if tokens[len(tokens)-1].Data == "sup" {
-				problem.AddPart("^" + curToken.Data)
-				// fmt.Printf("sup tag %#v\n", curToken)
-				continue
+			if isAnswer(tokens) {
+				problem.AddAnswer(curToken.Data)
 			}
-
-			if curToken.Data == "Решение" {
-				seenAnswerLabel = true
-				// fmt.Println("seen решение")
-				// fmt.Println(problem)
-			}
-
-			// if curToken.Data == " На рисунке изображён график функции вида " {
-			// 	fmt.Printf("found answer %v\n", curToken)
-			// 	for _, tok := range tokens {
-			// 		fmt.Printf("tok: %#v\n", tok)
-			// 	}
-			// }
-
-			if problem.Answer == "" && !seenAnswerLabel {
-				res, err := isProblemDescription(tokens)
-				if err != nil {
-					return &problem, err
-				}
-
-				if res {
-					curToken.Data = strings.ReplaceAll(curToken.Data, "\u202f", " ")
-					curToken.Data = strings.ReplaceAll(curToken.Data, "\u2009", " ")
-					problem.AddPart(curToken.Data)
-				}
-			}
-
-			res, err := isProblemAnswer(tokens)
-			if err != nil {
-				return &problem, err
-			}
-			// if res || strings.TrimSpace(curToken.Data) != "" && strings.Contains(curToken.Data, ": -4.") {
-			// 	fmt.Printf("found answer %v\n", curToken)
-			// 	for _, tok := range tokens {
-			// 		fmt.Printf("tok: %#v\n", tok)
-			// 	}
-			// 	fmt.Printf("\n\n\t\tres: %v, text: '%v' %v\n", res, curToken.Data, strings.Contains(curToken.Data, ": -4."))
-			// }
-
-			if res && strings.TrimSpace(curToken.Data) != "" {
-				// fmt.Printf("\twrote answer %v\n", curToken)
-				// // fmt.Printf("found answer\n")
-				// // for _, tok := range tokens {
-				// // 	fmt.Printf("tok: %#v\n", tok)
-				// // }
-
-				rawAnswer := curToken.Data
-				rawAnswer = strings.TrimSpace(rawAnswer)
-				rawAnswer = strings.TrimSuffix(rawAnswer, ".")
-
-				splitted := strings.Split(rawAnswer, ":")
-				if len(splitted) != 2 {
-					// output <- &ProblemWError{Problem: &problem, Error: fmt.Errorf("fail to parse raw answer %v %v", problemId, curToken.Data)}
-					// return
-					break
-				}
-				// rawAnswer = strings.TrimPrefix(rawAnswer, ":")
-				rawAnswer = strings.TrimSpace(splitted[1])
-
-				problem.Answer = rawAnswer
-			}
-
 		case tt == html.EndTagToken:
 			tokens = tokens[:len(tokens)-1]
 		case tt == html.SelfClosingTagToken:
-			// image is a part of descriptions (formulas)
-			if curToken.Data == "img" {
-				res, err := isImageDescr(tokens)
-				if err != nil {
-					return &problem, err
-				}
-
-				if !res {
-					continue
-				}
-
-				imgSrc, err := getAttrToken(&curToken, "src")
-				if !strings.HasPrefix(imgSrc, "https://ege.sdamgia.ru/formula/svg") {
-					continue
-				}
-				// fmt.Printf("try descr %#v\n", curToken)
-				if err != nil {
-					return &problem, fmt.Errorf("image has no src: %v err: %v", curToken, err)
-				} else if !seenAnswerLabel {
-					problem.Parts = append(problem.Parts, imgSrc)
-					// fmt.Printf("added new image %v\n", imgSrc)
-				}
-
-				// if !res {
-				// 	continue
-				// }
-
+			// check that image in description
+			if val, ok := getAttrToken(&curToken, "class"); ok == nil && val == "tex" && isDescription(tokens) {
+				imgSrc, _ := getAttrToken(&curToken, "src")
+				problem.AddPart(imgSrc)
 			}
 		case tt == html.StartTagToken:
 			tokens = append(tokens, curToken)
-
-			res, err := isImageProblem(tokens)
-			if err != nil {
-				return &problem, err
-			}
-
-			if res {
-				imgSrc, err := getAttrToken(&curToken, "src")
-				if err != nil {
-					return &problem, fmt.Errorf("image has no src: %v err: %v", curToken, err)
-				} else {
-					problem.ProblemImage = problemImageBaseUrl + imgSrc
-				}
+			if curToken.Data == "img" && isDescription(tokens) {
+				imgSrc, _ := getAttrToken(&curToken, "src")
+				imgSrc = strings.TrimSpace(imgSrc)
+				problem.ProblemImage = problemImageBaseUrl + imgSrc
 			}
 		}
 	}
@@ -246,97 +165,31 @@ out:
 	return &problem, nil
 }
 
-func isProblemAnswer(tokens []html.Token) (bool, error) {
-	if len(tokens) < 5 {
-		return false, nil
-	}
+func isDescription(tokens []html.Token) bool {
+	query := []string{"nobreak", "pbody", "left_margin"}
 
-	res, err := isEndingTypes(tokens, []string{"p", "p", "center", "p"})
-	if err != nil {
-		return false, fmt.Errorf("failed to get problem answer, err: %v", err)
-	}
-	val, _ := getAttrToken(&tokens[len(tokens)-5], "class")
-	// val12, _ := getAttrToken(&tokens[len(tokens)-4], "class")
-
-	res2, err := isEndingTypes(tokens, []string{"p", "p", "div", "div"})
-	if err != nil {
-		return false, fmt.Errorf("failed to get problem answer, err: %v", err)
-	}
-	val2, _ := getAttrToken(&tokens[len(tokens)-2], "class")
-	divWidth, _ := getAttrToken(&tokens[len(tokens)-4], "width")
-
-	res3, err := isEndingTypes(tokens, []string{"span", "div"})
-	if err != nil {
-		return false, fmt.Errorf("failed to get problem answer, err: %v", err)
-	}
-	val3, _ := getAttrToken(&tokens[len(tokens)-2], "class")
-
-	res4, err := isEndingTypes(tokens, []string{"p", "p", "p"})
-	if err != nil {
-		return false, fmt.Errorf("failed to get problem answer, err: %v", err)
-	}
-	val41, _ := getAttrToken(&tokens[len(tokens)-2], "class")
-	val42, _ := getAttrToken(&tokens[len(tokens)-3], "class")
-
-	subr := (res3 && val3 == "answer") || (res2 && val2 == "left_margin" && divWidth != "100%")
-	//  || (res && val12 == "left_margin")
-	return (subr) || (res && val == "solution") || (res4 && val41 == "left_margin" && val42 == "left_margin"), nil
+	return tokensContain(tokens, query)
 }
 
-func isImageProblem(tokens []html.Token) (bool, error) {
-	if len(tokens) < 2 {
-		return false, nil
-	}
+func isAnswer(tokens []html.Token) bool {
+	query := []string{"answer"}
 
-	// last one should be <img> <- left_margin
-	if tokens[len(tokens)-1].Data != "img" {
-		return false, nil
-	}
-
-	// fmt.Printf("try image %v\n", tokens[len(tokens)-1])
-	// for _, tok := range tokens[len(tokens)-4 : len(tokens)-1] {
-	// 	fmt.Printf("tok: %#v\n", tok)
-	// }
-
-	return isProblemDescription(tokens[:len(tokens)-1])
+	return tokensContain(tokens, query)
 }
 
-func isImageDescr(tokens []html.Token) (bool, error) {
-	if len(tokens) < 1 {
-		return false, nil
+// tokensContain returns true if query of class names is present in given order in tokens
+func tokensContain(tokens []html.Token, query []string) bool {
+	for i := 0; i < len(tokens)-len(query)+1; i++ {
+		good := true
+		for elidx, el := range query {
+			if val, ok := getAttrToken(&tokens[i+elidx], "class"); ok != nil || val != el {
+				good = false
+			}
+		}
+		if good {
+			return true
+		}
 	}
 
-	return isProblemDescription(tokens)
-}
-
-func isProblemDescription(tokens []html.Token) (bool, error) {
-	// pattern for description is left_margin<-img
-
-	if len(tokens) < 3 {
-		return false, nil
-	}
-
-	isDescr, err1 := isEndingClassNames(tokens, []string{"left_margin"})
-
-	isDescr2, err1 := isEndingClassNames(tokens[:len(tokens)-1], []string{"left_margin"})
-
-	isSol, err2 := isEndingClassNames(tokens, []string{"left_margin", "solution"})
-
-	// check that not comments
-	isComm, err3 := isEndingTypes(tokens, []string{"p", "div", "div"})
-	if err3 != nil {
-		return false, err3
-	}
-
-	if width, err := getAttrToken(&tokens[len(tokens)-3], "width"); err != nil && width != "100%" {
-		isComm = false
-	}
-
-	// isComm := false
-
-	if err1 != nil || err2 != nil {
-		return false, fmt.Errorf("problem description: one of error %v or %v", err1, err2)
-	}
-
-	return (isDescr || isDescr2) && !isSol && !isComm, nil
+	return false
 }
