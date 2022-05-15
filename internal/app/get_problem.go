@@ -25,7 +25,7 @@ func (s *Service) GetProblem(ctx context.Context, req *pb.GetProblemRequest) (*p
 
 	if _, err := s.DB.CreateSubmission(ctx, models.Submission{
 		ChatID:    models.ID(req.ChatId),
-		ProblemID: problem.ProblemID,
+		ProblemID: problem.ID,
 	}); err != nil {
 		return nil, status.Errorf(codes.Internal, "failed to create submission, err: %v", err)
 	}

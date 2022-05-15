@@ -31,18 +31,18 @@ func main() {
 	newServer := app.New(db.New(adp))
 
 	// Parse problems worker
-	go func() {
-		for {
-			log.Printf("Worker start")
-			err := newServer.ParseProblems(ctx)
-			if err != nil {
-				log.Printf("WORKER ERROR: <%v>", err)
-			}
-			log.Printf("worker finished")
+	// go func() {
+	// 	for {
+	// 		log.Printf("Worker start")
+	// 		err := newServer.ParseProblems(ctx)
+	// 		if err != nil {
+	// 			log.Printf("WORKER ERROR: <%v>", err)
+	// 		}
+	// 		log.Printf("worker finished")
 
-			time.Sleep(time.Hour * 2)
-		}
-	}()
+	// 		time.Sleep(time.Hour * 2)
+	// 	}
+	// }()
 
 	lis, err := net.Listen("tcp", cfg.Server.Host+":"+cfg.Server.Port)
 	if err != nil {

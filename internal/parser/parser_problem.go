@@ -143,6 +143,7 @@ out:
 
 			if isAnswer(tokens) {
 				problem.AddAnswer(curToken.Data)
+				break out
 			}
 		case tt == html.EndTagToken:
 			tokens = tokens[:len(tokens)-1]
@@ -168,7 +169,14 @@ out:
 func isDescription(tokens []html.Token) bool {
 	query := []string{"nobreak", "pbody", "left_margin"}
 
-	return tokensContain(tokens, query)
+	anySolution := false
+	for _, token := range tokens {
+		if tokenContainsClass(&token, "solution") {
+			anySolution = true
+		}
+	}
+
+	return tokensContain(tokens, query) && !anySolution
 }
 
 func isAnswer(tokens []html.Token) bool {
@@ -191,5 +199,14 @@ func tokensContain(tokens []html.Token, query []string) bool {
 		}
 	}
 
+	return false
+}
+
+func tokenContainsClass(token *html.Token, query string) bool {
+	for _, attr := range token.Attr {
+		if attr.Key == "class" && attr.Val == query {
+			return true
+		}
+	}
 	return false
 }

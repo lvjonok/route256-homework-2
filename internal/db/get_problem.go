@@ -9,7 +9,7 @@ import (
 )
 
 func (c client) GetProblem(ctx context.Context, problemID m.ID) (*m.Problem, error) {
-	const query = `select id, problem_id, category_id, image, parts, answer from problems where problem_id=$1 order by updated_at desc limit 1;`
+	const query = `select id, problem_id, category_id, image, parts, answer from problems where id=$1`
 
 	p := m.Problem{}
 

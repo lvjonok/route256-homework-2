@@ -49,22 +49,18 @@ message GetStatRequest {
 };
 
 message TaskStat {
-  int64 correct = 1;
-  int64 all = 2;
+  int64 task_number = 1;
+  int64 correct = 2;
+  int64 all = 3;
 };
 
 message GetStatResponse {
   repeated TaskStat stat = 1;
 };
 
-enum TimePeriod {
-  TODAY = 0;
-  ALL_TIME = 1;
-};
 
 message GetRatingRequest {
   int64 chat_id = 1;
-  TimePeriod period = 2;
 };
 
 message GetRatingResponse {
@@ -78,6 +74,14 @@ message ParseProblemsRequest {
 
 message ParseProblemsResponse {};
 
+message GetImageRequest {
+  int64 image_id = 1;
+};
+
+message GetImageResponse {
+  bytes image = 1;
+};
+
 service MathHelper {
   // rpc ParseProblems (ParseProblemsRequest) returns (ParseProblemsResponse);
   rpc GetRating (GetRatingRequest) returns (GetRatingResponse);
@@ -85,4 +89,5 @@ service MathHelper {
   rpc CheckAnswer (CheckAnswerRequest) returns (CheckAnswerResponse);
   rpc GetRandom (GetRandomRequest) returns (GetRandomResponse);
   rpc GetProblem (GetProblemRequest) returns (GetProblemResponse);
+  rpc GetImage (GetImageRequest) returns (GetImageResponse);
 };

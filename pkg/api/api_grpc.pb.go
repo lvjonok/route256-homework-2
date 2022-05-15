@@ -28,6 +28,7 @@ type MathHelperClient interface {
 	CheckAnswer(ctx context.Context, in *CheckAnswerRequest, opts ...grpc.CallOption) (*CheckAnswerResponse, error)
 	GetRandom(ctx context.Context, in *GetRandomRequest, opts ...grpc.CallOption) (*GetRandomResponse, error)
 	GetProblem(ctx context.Context, in *GetProblemRequest, opts ...grpc.CallOption) (*GetProblemResponse, error)
+	GetImage(ctx context.Context, in *GetImageRequest, opts ...grpc.CallOption) (*GetImageResponse, error)
 }
 
 type mathHelperClient struct {
@@ -83,6 +84,15 @@ func (c *mathHelperClient) GetProblem(ctx context.Context, in *GetProblemRequest
 	return out, nil
 }
 
+func (c *mathHelperClient) GetImage(ctx context.Context, in *GetImageRequest, opts ...grpc.CallOption) (*GetImageResponse, error) {
+	out := new(GetImageResponse)
+	err := c.cc.Invoke(ctx, "/api.MathHelper/GetImage", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // MathHelperServer is the server API for MathHelper service.
 // All implementations must embed UnimplementedMathHelperServer
 // for forward compatibility
@@ -93,6 +103,7 @@ type MathHelperServer interface {
 	CheckAnswer(context.Context, *CheckAnswerRequest) (*CheckAnswerResponse, error)
 	GetRandom(context.Context, *GetRandomRequest) (*GetRandomResponse, error)
 	GetProblem(context.Context, *GetProblemRequest) (*GetProblemResponse, error)
+	GetImage(context.Context, *GetImageRequest) (*GetImageResponse, error)
 	mustEmbedUnimplementedMathHelperServer()
 }
 
@@ -114,6 +125,9 @@ func (UnimplementedMathHelperServer) GetRandom(context.Context, *GetRandomReques
 }
 func (UnimplementedMathHelperServer) GetProblem(context.Context, *GetProblemRequest) (*GetProblemResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetProblem not implemented")
+}
+func (UnimplementedMathHelperServer) GetImage(context.Context, *GetImageRequest) (*GetImageResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetImage not implemented")
 }
 func (UnimplementedMathHelperServer) mustEmbedUnimplementedMathHelperServer() {}
 
@@ -218,6 +232,24 @@ func _MathHelper_GetProblem_Handler(srv interface{}, ctx context.Context, dec fu
 	return interceptor(ctx, in, info, handler)
 }
 
+func _MathHelper_GetImage_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetImageRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MathHelperServer).GetImage(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/api.MathHelper/GetImage",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MathHelperServer).GetImage(ctx, req.(*GetImageRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // MathHelper_ServiceDesc is the grpc.ServiceDesc for MathHelper service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -244,6 +276,10 @@ var MathHelper_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetProblem",
 			Handler:    _MathHelper_GetProblem_Handler,
+		},
+		{
+			MethodName: "GetImage",
+			Handler:    _MathHelper_GetImage_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

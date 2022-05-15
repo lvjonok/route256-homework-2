@@ -30,7 +30,7 @@ func (s *Service) GetRandom(ctx context.Context, req *pb.GetRandomRequest) (*pb.
 
 	if _, err := s.DB.CreateSubmission(ctx, models.Submission{
 		ChatID:    models.ID(req.ChatId),
-		ProblemID: p.ProblemID,
+		ProblemID: p.ID,
 	}); err != nil {
 		return nil, status.Errorf(codes.Internal, "failed to create submission, err: %v", err)
 	}

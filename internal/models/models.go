@@ -33,6 +33,19 @@ type Submission struct {
 	ChatID       ID
 	ProblemID    ID // foreign key from Problem.ID
 	Result       Result
-	// CreatedAt    time.Time
-	// UpdatedAt    time.Time
+}
+
+type TaskStat struct {
+	TaskNumber int
+	Correct    int
+	All        int
+}
+
+type Statistics struct {
+	Stat []TaskStat
+}
+
+type Rating struct {
+	Position int
+	All      int
 }

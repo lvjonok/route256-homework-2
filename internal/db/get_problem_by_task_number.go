@@ -9,9 +9,9 @@ import (
 
 func (c client) GetProblemByTaskNumber(ctx context.Context, taskNumber int) (*m.Problem, error) {
 	const query = `SELECT p.id, p.problem_id, p.category_id, p.image, p.parts, p.answer
-		FROM (SELECT DISTINCT *
+		FROM (SELECT DISTINCT ON (p.problem_id) *
 					FROM problems p
-					ORDER BY p.updated_at DESC) AS p
+					ORDER BY p.problem_id, p.updated_at DESC) AS p
 						JOIN categories c ON p.category_id = c.id
 		WHERE c.task_number = $1
 		ORDER BY RANDOM()
