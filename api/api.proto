@@ -2,6 +2,8 @@ syntax = "proto3";
 
 option go_package = "gitlab.ozon.dev/lvjonok/homework-2";
 
+import "google/api/annotations.proto";
+
 package api;
 
 message Problem {
@@ -83,11 +85,40 @@ message GetImageResponse {
 };
 
 service MathHelper {
-  // rpc ParseProblems (ParseProblemsRequest) returns (ParseProblemsResponse);
-  rpc GetRating (GetRatingRequest) returns (GetRatingResponse);
-  rpc GetStat (GetStatRequest) returns (GetStatResponse);
-  rpc CheckAnswer (CheckAnswerRequest) returns (CheckAnswerResponse);
-  rpc GetRandom (GetRandomRequest) returns (GetRandomResponse);
-  rpc GetProblem (GetProblemRequest) returns (GetProblemResponse);
-  rpc GetImage (GetImageRequest) returns (GetImageResponse);
+  rpc GetRating (GetRatingRequest) returns (GetRatingResponse) {
+    option (google.api.http) = {
+      post: "/rating"
+      body: "*"
+    };
+  }
+  rpc GetStat (GetStatRequest) returns (GetStatResponse) {
+    option (google.api.http) = {
+      post: "/stat"
+      body: "*"
+    };
+  }
+  rpc CheckAnswer (CheckAnswerRequest) returns (CheckAnswerResponse) {
+    option (google.api.http) = {
+      post: "/check"
+      body: "*"
+    };
+  }
+  rpc GetRandom (GetRandomRequest) returns (GetRandomResponse) {
+    option (google.api.http) = {
+      post: "/random"
+      body: "*"
+    };
+  }
+  rpc GetProblem (GetProblemRequest) returns (GetProblemResponse) {
+    option (google.api.http) = {
+      post: "/problem"
+      body: "*"
+    };
+  }
+  rpc GetImage (GetImageRequest) returns (GetImageResponse) {
+    option (google.api.http) = {
+      post: "/image"
+      body: "*"
+    };
+  }
 };

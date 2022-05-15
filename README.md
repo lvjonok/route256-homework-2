@@ -48,3 +48,7 @@
 
 1. Задачки берутся с сайта (reshuege.ru с упоминанием)
 1. В набор задачек входят только задания 1-11 профильного егэ по математике
+
+```bash
+protoc --go_out=pkg --go_opt=paths=source_relative --go-grpc_out=pkg --go-grpc_opt=paths=source_relative --grpc-gateway_out=pkg --grpc-gateway_opt=paths=source_relative --openapiv2_out .  api/api.proto
+```

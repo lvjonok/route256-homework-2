@@ -1,0 +1,413 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "api/api.proto",
+    "version": "version not set"
+  },
+  "tags": [
+    {
+      "name": "MathHelper"
+    }
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/check": {
+      "post": {
+        "operationId": "MathHelper_CheckAnswer",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/apiCheckAnswerResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/apiCheckAnswerRequest"
+            }
+          }
+        ],
+        "tags": [
+          "MathHelper"
+        ]
+      }
+    },
+    "/image": {
+      "post": {
+        "operationId": "MathHelper_GetImage",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/apiGetImageResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/apiGetImageRequest"
+            }
+          }
+        ],
+        "tags": [
+          "MathHelper"
+        ]
+      }
+    },
+    "/problem": {
+      "post": {
+        "operationId": "MathHelper_GetProblem",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/apiGetProblemResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/apiGetProblemRequest"
+            }
+          }
+        ],
+        "tags": [
+          "MathHelper"
+        ]
+      }
+    },
+    "/random": {
+      "post": {
+        "operationId": "MathHelper_GetRandom",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/apiGetRandomResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/apiGetRandomRequest"
+            }
+          }
+        ],
+        "tags": [
+          "MathHelper"
+        ]
+      }
+    },
+    "/rating": {
+      "post": {
+        "operationId": "MathHelper_GetRating",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/apiGetRatingResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/apiGetRatingRequest"
+            }
+          }
+        ],
+        "tags": [
+          "MathHelper"
+        ]
+      }
+    },
+    "/stat": {
+      "post": {
+        "operationId": "MathHelper_GetStat",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/apiGetStatResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/apiGetStatRequest"
+            }
+          }
+        ],
+        "tags": [
+          "MathHelper"
+        ]
+      }
+    }
+  },
+  "definitions": {
+    "apiCheckAnswerRequest": {
+      "type": "object",
+      "properties": {
+        "chatId": {
+          "type": "string",
+          "format": "int64"
+        },
+        "answer": {
+          "type": "string"
+        }
+      }
+    },
+    "apiCheckAnswerResponse": {
+      "type": "object",
+      "properties": {
+        "problemId": {
+          "type": "string",
+          "format": "int64"
+        },
+        "answer": {
+          "type": "string"
+        },
+        "result": {
+          "$ref": "#/definitions/apiSubmitResult"
+        }
+      }
+    },
+    "apiGetImageRequest": {
+      "type": "object",
+      "properties": {
+        "imageId": {
+          "type": "string",
+          "format": "int64"
+        }
+      }
+    },
+    "apiGetImageResponse": {
+      "type": "object",
+      "properties": {
+        "image": {
+          "type": "string",
+          "format": "byte"
+        }
+      }
+    },
+    "apiGetProblemRequest": {
+      "type": "object",
+      "properties": {
+        "chatId": {
+          "type": "string",
+          "format": "int64"
+        },
+        "taskNumber": {
+          "type": "string",
+          "format": "int64"
+        }
+      }
+    },
+    "apiGetProblemResponse": {
+      "type": "object",
+      "properties": {
+        "problem": {
+          "$ref": "#/definitions/apiProblem"
+        }
+      }
+    },
+    "apiGetRandomRequest": {
+      "type": "object",
+      "properties": {
+        "chatId": {
+          "type": "string",
+          "format": "int64"
+        }
+      }
+    },
+    "apiGetRandomResponse": {
+      "type": "object",
+      "properties": {
+        "taskNumber": {
+          "type": "string",
+          "format": "int64"
+        },
+        "problem": {
+          "$ref": "#/definitions/apiProblem"
+        }
+      }
+    },
+    "apiGetRatingRequest": {
+      "type": "object",
+      "properties": {
+        "chatId": {
+          "type": "string",
+          "format": "int64"
+        }
+      }
+    },
+    "apiGetRatingResponse": {
+      "type": "object",
+      "properties": {
+        "position": {
+          "type": "string",
+          "format": "int64"
+        },
+        "all": {
+          "type": "string",
+          "format": "int64"
+        }
+      }
+    },
+    "apiGetStatRequest": {
+      "type": "object",
+      "properties": {
+        "chatId": {
+          "type": "string",
+          "format": "int64"
+        }
+      }
+    },
+    "apiGetStatResponse": {
+      "type": "object",
+      "properties": {
+        "stat": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/apiTaskStat"
+          }
+        }
+      }
+    },
+    "apiProblem": {
+      "type": "object",
+      "properties": {
+        "problemId": {
+          "type": "string",
+          "format": "int64"
+        },
+        "image": {
+          "type": "string"
+        },
+        "description": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "apiSubmitResult": {
+      "type": "string",
+      "enum": [
+        "CORRECT",
+        "WRONG"
+      ],
+      "default": "CORRECT"
+    },
+    "apiTaskStat": {
+      "type": "object",
+      "properties": {
+        "taskNumber": {
+          "type": "string",
+          "format": "int64"
+        },
+        "correct": {
+          "type": "string",
+          "format": "int64"
+        },
+        "all": {
+          "type": "string",
+          "format": "int64"
+        }
+      }
+    },
+    "protobufAny": {
+      "type": "object",
+      "properties": {
+        "@type": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": {}
+    },
+    "rpcStatus": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "message": {
+          "type": "string"
+        },
+        "details": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/protobufAny"
+          }
+        }
+      }
+    }
+  }
+}

@@ -22,7 +22,6 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type MathHelperClient interface {
-	// rpc ParseProblems (ParseProblemsRequest) returns (ParseProblemsResponse);
 	GetRating(ctx context.Context, in *GetRatingRequest, opts ...grpc.CallOption) (*GetRatingResponse, error)
 	GetStat(ctx context.Context, in *GetStatRequest, opts ...grpc.CallOption) (*GetStatResponse, error)
 	CheckAnswer(ctx context.Context, in *CheckAnswerRequest, opts ...grpc.CallOption) (*CheckAnswerResponse, error)
@@ -97,7 +96,6 @@ func (c *mathHelperClient) GetImage(ctx context.Context, in *GetImageRequest, op
 // All implementations must embed UnimplementedMathHelperServer
 // for forward compatibility
 type MathHelperServer interface {
-	// rpc ParseProblems (ParseProblemsRequest) returns (ParseProblemsResponse);
 	GetRating(context.Context, *GetRatingRequest) (*GetRatingResponse, error)
 	GetStat(context.Context, *GetStatRequest) (*GetStatResponse, error)
 	CheckAnswer(context.Context, *CheckAnswerRequest) (*CheckAnswerResponse, error)
