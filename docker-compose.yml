@@ -1,0 +1,43 @@
+version: "3"
+
+services:
+  db:
+    network_mode: host
+    image: postgres:latest
+    restart: always
+    environment:
+      - POSTGRES_USER=root
+      - POSTGRES_PASSWORD=root
+      - POSTGRES_DB=rootdb
+      - PGDATA=/var/lib/postgresql/data/pgdata
+    volumes:
+      - data:/var/lib/postgresql/data
+
+  migrations:
+    network_mode: host
+    build:
+      context: .
+      dockerfile: Dockerfile_migrations
+    depends_on:
+      - db
+
+  server:
+    network_mode: host
+    build:
+      context: .
+      dockerfile: Dockerfile_server
+    depends_on:
+      - db
+
+  client:
+    network_mode: host
+    build:
+      context: .
+      dockerfile: Dockerfile_client
+      network: host
+    depends_on:
+      - server
+
+volumes:
+  data:
+    driver: local

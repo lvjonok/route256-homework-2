@@ -159,13 +159,16 @@ func imagePartToBytes(url string) ([]byte, error) {
 	// FIXME: should create tmp directory sadly
 	encurl := strings.Join(strings.Split(url, "/"), "-")
 
-	err = os.WriteFile(path.Join("tmp", encurl), raw, 0666)
+	svgFilename := path.Join("tmp", encurl)
+	// log.Printf("filename for svg is: %v", svgFilename)
+
+	err = os.WriteFile(svgFilename, raw, 0666)
 	if err != nil {
 		log.Printf("failed to create file with new image, %v", err)
 		return nil, err
 	}
 
-	imgbytes, err := svg2png(path.Join("tmp", encurl))
+	imgbytes, err := svg2png(svgFilename)
 	if err != nil {
 		log.Printf("error in svg2path, %v", err)
 		return nil, err
@@ -176,14 +179,12 @@ func imagePartToBytes(url string) ([]byte, error) {
 func svg2png(svgfpath string) ([]byte, error) {
 	app := "inkscape"
 	args := []string{
-		"-z",
-		"-b FFFFFF",
-		// "-w=1920",
-		// "-h=1080",
-		"-d=300",
-		fmt.Sprintf("--export-png=%s.png", svgfpath),
+		"-b",
+		"FFFFFF",
+		"-d",
+		"300",
+		fmt.Sprintf("--export-filename=%s.png", svgfpath),
 		svgfpath,
-		//  fmt.Sprintf("%s", svgfpath),
 	}
 
 	cmd := exec.Command(app, args...)

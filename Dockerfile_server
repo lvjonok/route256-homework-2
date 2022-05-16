@@ -1,0 +1,16 @@
+FROM golang:1.18-alpine
+
+WORKDIR /app
+
+RUN apk add \
+    --no-cache \
+    --update \
+    ttf-freefont \
+    poppler --repository=http://dl-cdn.alpinelinux.org/alpine/edge/main \
+    inkscape=~"1" --repository=http://dl-cdn.alpinelinux.org/alpine/edge/community
+
+ADD . .
+RUN go mod download
+
+RUN go build -o server cmd/server/main.go
+CMD ["./server"]
