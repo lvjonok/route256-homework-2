@@ -1,0 +1,7 @@
+telegram:
+  bot-api: your bot api
+database:
+  conn-url: postgresql://root:root@localhost:5432/rootdb
+server:
+  host: localhost
+  port: 8080
