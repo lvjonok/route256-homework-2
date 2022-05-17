@@ -3,17 +3,13 @@ package app
 import (
 	"context"
 	"fmt"
-	"io/ioutil"
 	"log"
-	"net/http"
-	"os"
-	"os/exec"
-	"path"
 	"strings"
 	"sync"
 
 	"gitlab.ozon.dev/lvjonok/homework-2/internal/models"
 	"gitlab.ozon.dev/lvjonok/homework-2/internal/parser"
+	"gitlab.ozon.dev/lvjonok/homework-2/internal/svgconv"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
@@ -91,7 +87,7 @@ func (s *Service) ParseProblems(ctx context.Context) error {
 
 		for _, part := range pproblem.Parts {
 			if strings.HasPrefix(part, "https://") {
-				imgbytes, err := imagePartToBytes(part)
+				imgbytes, err := svgconv.ImagePartToBytes(part)
 				if err != nil {
 					log.Printf("failed to convert image part to bytes, err: %v", err)
 					broke = true
@@ -117,7 +113,7 @@ func (s *Service) ParseProblems(ctx context.Context) error {
 		}
 
 		if dbproblem.ProblemImage != "" {
-			imgbytes, err := imagePartToBytes(dbproblem.ProblemImage)
+			imgbytes, err := svgconv.ImagePartToBytes(dbproblem.ProblemImage)
 			if err != nil {
 				log.Printf("failed to convert image part to bytes, err: %v", err)
 				continue
@@ -139,64 +135,4 @@ func (s *Service) ParseProblems(ctx context.Context) error {
 	}
 
 	return nil
-}
-
-func imagePartToBytes(url string) ([]byte, error) {
-	// download image and add it to the database
-	resp, err := http.Get(url)
-	if err != nil {
-		log.Printf("failed to get req: %v", err)
-		return nil, err
-	}
-
-	defer resp.Body.Close()
-	raw, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		log.Printf("failed to read body: %v", err)
-		return nil, err
-	}
-
-	// FIXME: should create tmp directory sadly
-	encurl := strings.Join(strings.Split(url, "/"), "-")
-
-	svgFilename := path.Join("tmp", encurl)
-	// log.Printf("filename for svg is: %v", svgFilename)
-
-	err = os.WriteFile(svgFilename, raw, 0666)
-	if err != nil {
-		log.Printf("failed to create file with new image, %v", err)
-		return nil, err
-	}
-
-	imgbytes, err := svg2png(svgFilename)
-	if err != nil {
-		log.Printf("error in svg2path, %v", err)
-		return nil, err
-	}
-	return imgbytes, nil
-}
-
-func svg2png(svgfpath string) ([]byte, error) {
-	app := "inkscape"
-	args := []string{
-		"-b",
-		"FFFFFF",
-		"-d",
-		"300",
-		fmt.Sprintf("--export-filename=%s.png", svgfpath),
-		svgfpath,
-	}
-
-	cmd := exec.Command(app, args...)
-	output, err := cmd.Output()
-	if err != nil {
-		return nil, fmt.Errorf("run error on %v: <%v>, %v", svgfpath, err, output)
-	}
-
-	raw, err := ioutil.ReadFile(fmt.Sprintf("%s.png", svgfpath))
-	if err != nil {
-		return nil, fmt.Errorf("read error: %v", err)
-	}
-
-	return raw, nil
 }

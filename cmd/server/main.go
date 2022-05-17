@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"net"
 	"net/http"
@@ -28,14 +29,13 @@ func runRest(cfg *config.Config) {
 	if err != nil {
 		panic(err)
 	}
-	log.Printf("server listening at 8081")
-	if err := http.ListenAndServe(":8081", mux); err != nil {
+	fmt.Printf("run serve rest")
+	if err := http.ListenAndServe(cfg.Server.Host+":"+cfg.Server.RestPort, mux); err != nil {
 		panic(err)
 	}
 }
 
 func main() {
-
 	cfg, err := config.New("config.yaml")
 	if err != nil {
 		panic(err)
@@ -69,7 +69,6 @@ func main() {
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
 	}
-	// var opts []grpc.ServerOption
 	opts := []grpc.ServerOption{
 		grpc.UnaryInterceptor(mw.LogInterceptor),
 	}

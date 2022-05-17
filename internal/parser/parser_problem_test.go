@@ -14,20 +14,22 @@ func TestParseProblem(t *testing.T) {
 		Expected  *Problem
 	}{
 		{
-			ProblemID: 100,
-			Expected:  &Problem{},
-		},
-		{
-			ProblemID: 200,
-			Expected:  &Problem{},
-		},
-		{
-			ProblemID: 300,
-			Expected:  &Problem{},
+			ProblemID: 77415,
+			Expected: &Problem{
+				ProblemId:    77415,
+				ProblemImage: "",
+				Parts:        []string{"Найдите значение выражения", "https://ege.sdamgia.ru/formula/svg/9e/9e5acdd0b0eda0bc92a128a2a1d9a0f8.svg", "если", "https://ege.sdamgia.ru/formula/svg/82/82903cf1c84f5c9788fd410cd677298b.svg"},
+				Answer:       "22",
+			},
 		},
 		{
 			ProblemID: 27151,
-			Expected:  &Problem{},
+			Expected: &Problem{
+				ProblemId:    27151,
+				ProblemImage: "https://ege.sdamgia.ru/get_file?id=66984",
+				Parts:        []string{"Основанием прямой треугольной призмы служит прямоугольный треугольник с катетами 6 и 8. Площадь ее поверхности равна 288. Найдите высоту призмы."},
+				Answer:       "10",
+			},
 		},
 	}
 
@@ -35,7 +37,7 @@ func TestParseProblem(t *testing.T) {
 		t.Run(fmt.Sprintf("test %d, idx", idx), func(t *testing.T) {
 			got, err := ParseProblem(tt.ProblemID)
 			require.NoError(t, err)
-			require.True(t, reflect.DeepEqual(got, tt.Expected))
+			require.Truef(t, reflect.DeepEqual(got, tt.Expected), "problem:%d\nexpected %v\ngot%v", tt.ProblemID, tt.Expected, got)
 		})
 	}
 }

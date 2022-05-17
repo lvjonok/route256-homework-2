@@ -10,7 +10,6 @@ import (
 )
 
 func (s *Service) GetImage(ctx context.Context, req *pb.GetImageRequest) (*pb.GetImageResponse, error) {
-
 	image, err := s.DB.GetImage(ctx, models.ID(req.ImageId))
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "failed to get image by id, err: %v", err)

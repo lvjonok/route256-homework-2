@@ -4,7 +4,6 @@ import (
 	"context"
 	"math/rand"
 
-	"gitlab.ozon.dev/lvjonok/homework-2/internal/models"
 	pb "gitlab.ozon.dev/lvjonok/homework-2/pkg/api"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -13,27 +12,10 @@ import (
 func (s *Service) GetRandom(ctx context.Context, req *pb.GetRandomRequest) (*pb.GetRandomResponse, error) {
 	randTaskNumber := rand.Intn(10) + 1
 
-	p, err := s.DB.GetProblemByTaskNumber(ctx, randTaskNumber)
+	resp, err := s.GetProblem(ctx, &pb.GetProblemRequest{ChatId: req.ChatId, TaskNumber: int64(randTaskNumber)})
 	if err != nil {
-		return nil, status.Errorf(codes.Internal, "failed to get random, err: %v", err)
+		return nil, status.Errorf(codes.Internal, "failed to get random problem, err: <%v>", err)
 	}
 
-	pbProblem := pb.Problem{
-		ProblemId:   int64(p.ProblemID),
-		Image:       p.ProblemImage,
-		Description: p.Parts,
-	}
-
-	if err := s.DB.UpdateAbortedSubmissions(ctx, models.ID(req.ChatId)); err != nil {
-		return nil, status.Errorf(codes.Internal, "failed to abort pending subs of user: %v, err: %v", req.ChatId, err)
-	}
-
-	if _, err := s.DB.CreateSubmission(ctx, models.Submission{
-		ChatID:    models.ID(req.ChatId),
-		ProblemID: p.ID,
-	}); err != nil {
-		return nil, status.Errorf(codes.Internal, "failed to create submission, err: %v", err)
-	}
-
-	return &pb.GetRandomResponse{TaskNumber: int64(randTaskNumber), Problem: &pbProblem}, nil
+	return &pb.GetRandomResponse{TaskNumber: int64(randTaskNumber), Problem: resp.Problem}, nil
 }
