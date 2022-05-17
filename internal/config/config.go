@@ -15,8 +15,9 @@ type Config struct {
 		Url string `yaml:"conn-url"`
 	} `yaml:"database"`
 	Server struct {
-		Host string `yaml:"host"`
-		Port string `yaml:"port"`
+		Host     string `yaml:"host"`
+		Port     string `yaml:"port"`
+		RestPort string `yaml:"restport"`
 	} `yaml:"server"`
 }
 

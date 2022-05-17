@@ -9,13 +9,13 @@ import (
 )
 
 type ProblemCategory struct {
-	Problem    int
-	CategotyId int
-	Title      string
+	Problem    int    // task number
+	CategotyId int    // id of category from reshuege
+	Title      string // title of category
 }
 
 func ParseCategories() ([]*ProblemCategory, error) {
-	url := "https://ege.sdamgia.ru/prob_catalog"
+	url := fmt.Sprintf("%s/prob_catalog", baseURL)
 
 	resp, err := http.Get(url)
 	if err != nil {
@@ -26,12 +26,8 @@ func ParseCategories() ([]*ProblemCategory, error) {
 	tokenizer := html.NewTokenizer(resp.Body)
 
 	categories := []*ProblemCategory{}
-
-	// in parsed website each category follows
-
 	tokens := []html.Token{}
-
-	lastProblem := 0
+	lastProblem := 0 // task number - [1, 11]
 
 out:
 	for {
@@ -41,7 +37,7 @@ out:
 			break out
 		case tt == html.TextToken:
 			if ok, _ := isProblemSpan(tokens); ok {
-				pb, err := strconv.ParseInt(tokenizer.Token().Data, 10, 32)
+				pb, err := strconv.Atoi(tokenizer.Token().Data)
 				if err != nil {
 					fmt.Println("errored", err)
 					return nil, err
@@ -52,7 +48,6 @@ out:
 				if lastProblem == 12 {
 					break out
 				}
-				// fmt.Printf("span last %v\n", pb)
 			}
 			ok, err := isCategoryTitle(tokens)
 			if err != nil {
@@ -79,16 +74,6 @@ out:
 			t := tokenizer.Token()
 			// add new token for our path
 			tokens = append(tokens, t)
-
-			// res, _ := isLastCategory(tokens)
-			// if res {
-			// 	// fmt.Printf("last is category %#v\n", tokens[len(tokens)-1])
-			// 	link, err := getAttrToken(&t, "href")
-			// 	if err != nil {
-			// 		log.Fatal(err)
-			// 	}
-			// 	// fmt.Printf("link for category %v\n", link)
-			// }
 		}
 	}
 
@@ -110,7 +95,6 @@ func isCategoryTitle(tokens []html.Token) (bool, error) {
 }
 
 func parseCategoryId(tokens []html.Token) (int, error) {
-	// last token should be cat_name<-cat_category<-cat_children
 	categoryIdRaw, err := getAttrToken(&tokens[len(tokens)-2], "data-id")
 	if err != nil {
 		return 0, fmt.Errorf("failed to parse category, err: %v", err)
@@ -121,9 +105,4 @@ func parseCategoryId(tokens []html.Token) (int, error) {
 	}
 
 	return categoryId, nil
-}
-
-func isLastCategory(tokens []html.Token) (bool, error) {
-	// general pattern of class attr is: cat_category -> cat_children -> cat_category
-	return isEndingClassNames(tokens, []string{"cat_show", "cat_category", "cat_children", "cat_category"})
 }
