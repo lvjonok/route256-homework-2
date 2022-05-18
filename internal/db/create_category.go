@@ -8,7 +8,7 @@ import (
 	m "gitlab.ozon.dev/lvjonok/homework-2/internal/models"
 )
 
-func (c client) CreateCategory(ctx context.Context, cat m.Category) (*m.ID, error) {
+func (c *Client) CreateCategory(ctx context.Context, cat m.Category) (*m.ID, error) {
 	tx, err := c.pool.Begin(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("failed to start transaction, err: <%v>", err)

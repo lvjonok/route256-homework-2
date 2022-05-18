@@ -8,7 +8,7 @@ import (
 	m "gitlab.ozon.dev/lvjonok/homework-2/internal/models"
 )
 
-func (c client) GetProblem(ctx context.Context, problemID m.ID) (*m.Problem, error) {
+func (c *Client) GetProblem(ctx context.Context, problemID m.ID) (*m.Problem, error) {
 	const query = `select id, problem_id, category_id, image, parts, answer from problems where id=$1`
 
 	p := m.Problem{}

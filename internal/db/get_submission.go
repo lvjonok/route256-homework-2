@@ -2,11 +2,18 @@ package db
 
 import (
 	"context"
+	"fmt"
 
-	m "gitlab.ozon.dev/lvjonok/homework-2/internal/models"
+	"gitlab.ozon.dev/lvjonok/homework-2/internal/models"
 )
 
-func (c client) GetSubmission(ctx context.Context, problem m.ID) error {
+func (c *Client) GetSubmission(ctx context.Context, id models.ID) (*models.Submission, error) {
+	const query = `SELECT id, chat_id, problem_id, result from submissions where id=$1;`
+	var sub models.Submission
 
-	return nil
+	err := c.pool.QueryRow(ctx, query, id).Scan(&sub.SubmissionID, &sub.ChatID, &sub.ProblemID, &sub.Result)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get submission by id, err: %v", err)
+	}
+	return &sub, nil
 }

@@ -8,10 +8,10 @@ import (
 
 var ErrNotFound = errors.New("not found")
 
-type client struct {
+type Client struct {
 	pool *pgxpool.Pool
 }
 
-func New(pool *pgxpool.Pool) *client {
-	return &client{pool: pool}
+func New(pool *pgxpool.Pool) *Client {
+	return &Client{pool: pool}
 }

@@ -9,7 +9,7 @@ import (
 	"gitlab.ozon.dev/lvjonok/homework-2/internal/models"
 )
 
-func (c client) CreateImage(ctx context.Context, raw []byte, href string) (*models.ID, error) {
+func (c *Client) CreateImage(ctx context.Context, raw []byte, href string) (*models.ID, error) {
 	tx, err := c.pool.Begin(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("failed to start transaction, err: <%v>", err)

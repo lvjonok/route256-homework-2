@@ -8,7 +8,7 @@ import (
 	"gitlab.ozon.dev/lvjonok/homework-2/internal/models"
 )
 
-func (c client) GetLastUserSubmission(ctx context.Context, chatID models.ID) (*models.Submission, error) {
+func (c *Client) GetLastUserSubmission(ctx context.Context, chatID models.ID) (*models.Submission, error) {
 	const query = `SELECT s.id, s.chat_id, s.problem_id, s.result
 		FROM submissions s
 		WHERE s.chat_id = $1 AND s.result='pending'

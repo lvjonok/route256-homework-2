@@ -6,7 +6,7 @@ import (
 	"gitlab.ozon.dev/lvjonok/homework-2/internal/models"
 )
 
-func (c client) GetImage(ctx context.Context, id models.ID) ([]byte, error) {
+func (c *Client) GetImage(ctx context.Context, id models.ID) ([]byte, error) {
 	const query = `select image from images where id=$1;`
 
 	var image []byte

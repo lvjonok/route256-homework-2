@@ -7,7 +7,7 @@ import (
 	m "gitlab.ozon.dev/lvjonok/homework-2/internal/models"
 )
 
-func (c client) CreateSubmission(ctx context.Context, sub m.Submission) (*m.ID, error) {
+func (c *Client) CreateSubmission(ctx context.Context, sub m.Submission) (*m.ID, error) {
 	const query = `insert into submissions(chat_id, problem_id) 
 	VALUES ($1, $2) returning id;`
 

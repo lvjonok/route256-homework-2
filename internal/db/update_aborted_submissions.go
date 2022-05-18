@@ -7,7 +7,7 @@ import (
 	"gitlab.ozon.dev/lvjonok/homework-2/internal/models"
 )
 
-func (c client) UpdateAbortedSubmissions(ctx context.Context, chatID models.ID) error {
+func (c *Client) UpdateAbortedSubmissions(ctx context.Context, chatID models.ID) error {
 	const query = `UPDATE submissions
 		SET result='aborted'
 		WHERE chat_id=$1 and result='pending';`

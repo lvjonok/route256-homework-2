@@ -1,7 +1,6 @@
 FROM gomicro/goose
 
 ADD migrations /migrations/
-ADD entrypoint.sh /migrations/
 
 RUN chmod +x /migrations/entrypoint.sh
 

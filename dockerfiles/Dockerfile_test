@@ -1,0 +1,17 @@
+FROM golang:1.17.9-alpine
+
+WORKDIR /app
+RUN apk add \
+  --no-cache \
+  --update \
+  ttf-freefont \
+  poppler --repository=http://dl-cdn.alpinelinux.org/alpine/edge/main \
+  inkscape=~"1" --repository=http://dl-cdn.alpinelinux.org/alpine/edge/community
+RUN apk add gcc musl-dev
+
+ADD . .
+RUN go mod download
+
+RUN inkscape --help
+
+CMD ["go", "test", "-v", "./..."]

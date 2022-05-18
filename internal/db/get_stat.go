@@ -8,7 +8,7 @@ import (
 	m "gitlab.ozon.dev/lvjonok/homework-2/internal/models"
 )
 
-func (c client) GetStat(ctx context.Context, chatID m.ID) (*m.Statistics, error) {
+func (c *Client) GetStat(ctx context.Context, chatID m.ID) (*m.Statistics, error) {
 	const query = `SELECT c.task_number, count(s.result) FILTER ( WHERE s.result='correct' ), count(s.result)
 		FROM submissions s
 						JOIN problems p ON s.problem_id = p.id

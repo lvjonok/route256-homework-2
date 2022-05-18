@@ -11,7 +11,7 @@ services:
       - POSTGRES_DB=rootdb
       - PGDATA=/var/lib/postgresql/data/pgdata
     volumes:
-      - data:/var/lib/postgresql/data
+      - data-test:/var/lib/postgresql/data
 
   migrations:
     network_mode: host
@@ -21,23 +21,14 @@ services:
     depends_on:
       - db
 
-  server:
+  test:
     network_mode: host
     build:
       context: .
-      dockerfile: dockerfiles/Dockerfile_server
+      dockerfile: dockerfiles/Dockerfile_test
     depends_on:
       - db
 
-  client:
-    network_mode: host
-    build:
-      context: .
-      dockerfile: dockerfiles/Dockerfile_client
-      network: host
-    depends_on:
-      - server
-
 volumes:
-  data:
+  data-test:
     driver: local

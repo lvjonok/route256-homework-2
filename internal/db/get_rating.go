@@ -7,7 +7,7 @@ import (
 	m "gitlab.ozon.dev/lvjonok/homework-2/internal/models"
 )
 
-func (c client) GetRating(ctx context.Context, chatID m.ID) (*m.Rating, error) {
+func (c *Client) GetRating(ctx context.Context, chatID m.ID) (*m.Rating, error) {
 	const query = `SELECT row_number, al.amount
 		FROM (SELECT chat_id,
 								COUNT(s.chat_id) FILTER ( WHERE s.result = 'correct' ),

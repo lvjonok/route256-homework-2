@@ -8,7 +8,7 @@ import (
 	"gitlab.ozon.dev/lvjonok/homework-2/internal/models"
 )
 
-func (c client) CreateProblem(ctx context.Context, problem models.Problem) (*models.ID, error) {
+func (c *Client) CreateProblem(ctx context.Context, problem models.Problem) (*models.ID, error) {
 	tx, err := c.pool.Begin(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("failed to start transaction, err: <%v>", err)

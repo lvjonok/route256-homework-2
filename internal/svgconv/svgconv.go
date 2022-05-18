@@ -48,17 +48,16 @@ func ImagePartToBytes(url string) ([]byte, error) {
 func svg2png(svgfpath string) ([]byte, error) {
 	app := "inkscape"
 
-	variants := [2][]string{
-		// {
-		// 	// "-b",
-		// 	// "FFFFFF",
-		// 	// "-d",
-		// 	// "300",
-		// 	fmt.Sprintf("--export-filename=%s.png", svgfpath),
-		// 	svgfpath,
-		// },
+	variants := [][]string{
 		{
-			"-z",
+			"-b",
+			"FFFFFF",
+			"-d",
+			"300",
+			fmt.Sprintf("--export-filename=%s.png", svgfpath),
+			svgfpath,
+		},
+		{
 			"-b",
 			"FFFFFF",
 			"-d",
@@ -72,6 +71,7 @@ func svg2png(svgfpath string) ([]byte, error) {
 		cmd := exec.Command(app, v...)
 		_, err := cmd.Output()
 		if err != nil {
+			log.Printf("got error, while converting, err: <%v>", err)
 			continue
 		}
 

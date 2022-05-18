@@ -7,7 +7,7 @@ import (
 	"gitlab.ozon.dev/lvjonok/homework-2/internal/models"
 )
 
-func (c client) UpdateSubmission(ctx context.Context, sub models.Submission) error {
+func (c *Client) UpdateSubmission(ctx context.Context, sub models.Submission) error {
 	const query = `UPDATE submissions set result=$2 where id=$1;`
 
 	_, err := c.pool.Exec(ctx, query, sub.SubmissionID, sub.Result)
