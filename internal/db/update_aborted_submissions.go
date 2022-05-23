@@ -14,7 +14,7 @@ func (c *Client) UpdateAbortedSubmissions(ctx context.Context, chatID models.ID)
 
 	_, err := c.pool.Exec(ctx, query, chatID)
 	if err != nil {
-		return fmt.Errorf("failed to get abort submissions user %v submission, err: %v", chatID, err)
+		return fmt.Errorf("failed to get abort submissions user %v submission, err: <%v>", chatID, err)
 	}
 	return nil
 }

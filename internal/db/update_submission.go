@@ -12,7 +12,7 @@ func (c *Client) UpdateSubmission(ctx context.Context, sub models.Submission) er
 
 	_, err := c.pool.Exec(ctx, query, sub.SubmissionID, sub.Result)
 	if err != nil {
-		return fmt.Errorf("failed to update submission, err: %v", err)
+		return fmt.Errorf("failed to update submission, err: <%v>", err)
 	}
 	return nil
 }

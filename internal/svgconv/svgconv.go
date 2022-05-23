@@ -71,13 +71,13 @@ func svg2png(svgfpath string) ([]byte, error) {
 		cmd := exec.Command(app, v...)
 		_, err := cmd.Output()
 		if err != nil {
-			log.Printf("got error, while converting, err: <%v>", err)
+			log.Printf("got error, while converting, err: <%v>, trying next", err)
 			continue
 		}
 
 		raw, err := ioutil.ReadFile(fmt.Sprintf("%s.png", svgfpath))
 		if err != nil {
-			return nil, fmt.Errorf("converted, but read error: %v", err)
+			return nil, fmt.Errorf("converted, but read error: <%v>", err)
 		}
 
 		return raw, nil

@@ -10,17 +10,18 @@ import (
 	"google.golang.org/grpc/status"
 )
 
+// ChechAnswer compares last user's pending submission correct answer with given
 func (s *Service) CheckAnswer(ctx context.Context, req *pb.CheckAnswerRequest) (*pb.CheckAnswerResponse, error) {
 	lastUserSub, err := s.DB.GetLastUserSubmission(ctx, models.ID(req.ChatId))
 	if err == db.ErrNotFound {
 		return nil, status.Error(codes.NotFound, "cannot check answer without queried problem")
 	} else if err != nil {
-		return nil, status.Errorf(codes.Internal, "failed to get last user submission, err: %v", err)
+		return nil, status.Errorf(codes.Internal, "failed to get last user submission, err: <%v>", err)
 	}
 
 	problem, err := s.DB.GetProblem(ctx, lastUserSub.ProblemID)
 	if err != nil {
-		return nil, status.Errorf(codes.Internal, "failed to get problem by id, err: %v", err)
+		return nil, status.Errorf(codes.Internal, "failed to get problem by id, err: <%v>", err)
 	}
 
 	var res models.Result
@@ -36,7 +37,7 @@ func (s *Service) CheckAnswer(ctx context.Context, req *pb.CheckAnswerRequest) (
 		ProblemID:    lastUserSub.ProblemID,
 		Result:       res,
 	}); err != nil {
-		return nil, status.Errorf(codes.Internal, "failed to update submission, err: %v", err)
+		return nil, status.Errorf(codes.Internal, "failed to update submission, err: <%v>", err)
 	}
 
 	var pbRes pb.SubmitResult

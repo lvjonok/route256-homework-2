@@ -90,11 +90,6 @@ func (c *Client) SendPhoto(chatID int, photoBytes []byte, caption string) (*Mess
 		return nil, err
 	}
 
-	// res, err := cl.Post(url, "application/json", bytes.NewBuffer([]byte(load)))
-	// if err != nil {
-	// 	return nil, err
-	// }
-
 	rawbytes, err := ioutil.ReadAll(res.Body)
 	if err != nil {
 		return nil, err

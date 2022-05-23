@@ -17,7 +17,7 @@ func (c *Client) GetSubmission(ctx context.Context, id models.ID) (*models.Submi
 		if err == pgx.ErrNoRows {
 			return nil, ErrNotFound
 		}
-		return nil, fmt.Errorf("failed to get submission by id, err: %v", err)
+		return nil, fmt.Errorf("failed to get submission by id, err: <%v>", err)
 	}
 	return &sub, nil
 }

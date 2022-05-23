@@ -27,7 +27,7 @@ func (c *Client) GetLastUserSubmission(ctx context.Context, chatID models.ID) (*
 	if err == pgx.ErrNoRows {
 		return nil, ErrNotFound
 	} else if err != nil {
-		return nil, fmt.Errorf("failed to get last user %v submission, err: %v", chatID, err)
+		return nil, fmt.Errorf("failed to get last user %v submission, err: <%v>", chatID, err)
 	}
 	return &sub, nil
 }

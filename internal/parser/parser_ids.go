@@ -8,7 +8,6 @@ import (
 	"golang.org/x/net/html"
 )
 
-// https://ege.sdamgia.ru/test?filter=all&category_id=14&ttest=true
 func ParseProblemsIds(categoryId int) ([]int, error) {
 	url := fmt.Sprintf("%s/test?filter=all&category_id=%d&ttest=true", baseURL, categoryId)
 
@@ -36,7 +35,7 @@ out:
 			if res {
 				idInt, err := strconv.Atoi(tokenizer.Token().Data)
 				if err != nil {
-					return nil, fmt.Errorf("failed to atoi problem id %v, err: %v", tokenizer.Token(), err)
+					return nil, fmt.Errorf("failed to atoi problem id %v, err: <%v>", tokenizer.Token(), err)
 				}
 
 				problemIds = append(problemIds, idInt)

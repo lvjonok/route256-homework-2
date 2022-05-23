@@ -9,6 +9,7 @@ import (
 	"google.golang.org/grpc/status"
 )
 
+// GetProblem creates new pending submission for user for task number he requests
 func (s *Service) GetProblem(ctx context.Context, req *pb.GetProblemRequest) (*pb.GetProblemResponse, error) {
 	if req.TaskNumber < 1 || req.TaskNumber > 11 {
 		return nil, status.Error(codes.OutOfRange, "wrong task number, only [1, 11] are allowed")
@@ -16,18 +17,18 @@ func (s *Service) GetProblem(ctx context.Context, req *pb.GetProblemRequest) (*p
 
 	problem, err := s.DB.GetProblemByTaskNumber(ctx, int(req.TaskNumber))
 	if err != nil {
-		return nil, status.Errorf(codes.Internal, "failed to get problem by task number, err: %v", err)
+		return nil, status.Errorf(codes.Internal, "failed to get problem by task number, err: <%v>", err)
 	}
 
 	if err := s.DB.UpdateAbortedSubmissions(ctx, models.ID(req.ChatId)); err != nil {
-		return nil, status.Errorf(codes.Internal, "failed to abort pending subs of user: %v, err: %v", req.ChatId, err)
+		return nil, status.Errorf(codes.Internal, "failed to abort pending subs of user: %v, err: <%v>", req.ChatId, err)
 	}
 
 	if _, err := s.DB.CreateSubmission(ctx, models.Submission{
 		ChatID:    models.ID(req.ChatId),
 		ProblemID: problem.ID,
 	}); err != nil {
-		return nil, status.Errorf(codes.Internal, "failed to create submission, err: %v", err)
+		return nil, status.Errorf(codes.Internal, "failed to create submission, err: <%v>", err)
 	}
 
 	return &pb.GetProblemResponse{Problem: &pb.Problem{

@@ -9,6 +9,7 @@ import (
 	"google.golang.org/grpc/status"
 )
 
+// GetRandom calls GetProblem with randomly generated task number in range [1, 11]
 func (s *Service) GetRandom(ctx context.Context, req *pb.GetRandomRequest) (*pb.GetRandomResponse, error) {
 	randTaskNumber := rand.Intn(10) + 1
 

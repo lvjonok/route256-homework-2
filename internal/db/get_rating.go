@@ -26,7 +26,7 @@ func (c *Client) GetRating(ctx context.Context, chatID m.ID) (*m.Rating, error) 
 		if err == pgx.ErrNoRows {
 			return nil, ErrNotFound
 		}
-		return nil, fmt.Errorf("failed to get rating from database, err: %v", err)
+		return nil, fmt.Errorf("failed to get rating from database, err: <%v>", err)
 	}
 
 	return &m.Rating{Position: position, All: all}, nil

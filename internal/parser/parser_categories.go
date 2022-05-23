@@ -96,11 +96,11 @@ func isCategoryTitle(tokens []html.Token) (bool, error) {
 func parseCategoryId(tokens []html.Token) (int, error) {
 	categoryIdRaw, err := getAttrToken(&tokens[len(tokens)-2], "data-id")
 	if err != nil {
-		return 0, fmt.Errorf("failed to parse category, err: %v", err)
+		return 0, fmt.Errorf("failed to parse category, err: <%v>", err)
 	}
 	categoryId, err := strconv.Atoi(categoryIdRaw)
 	if err != nil {
-		return 0, fmt.Errorf("failed to convert to int category id: %v, err: %v", categoryIdRaw, err)
+		return 0, fmt.Errorf("failed to convert to int category id: %v, err: <%v>", categoryIdRaw, err)
 	}
 
 	return categoryId, nil

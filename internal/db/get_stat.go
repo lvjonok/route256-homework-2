@@ -22,7 +22,7 @@ func (c *Client) GetStat(ctx context.Context, chatID m.ID) (*m.Statistics, error
 		if err == pgx.ErrNoRows {
 			return nil, ErrNotFound
 		}
-		return nil, fmt.Errorf("failed to get stat from database, err: %v", err)
+		return nil, fmt.Errorf("failed to get stat from database, err: <%v>", err)
 	}
 
 	stat := m.Statistics{}

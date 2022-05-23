@@ -19,7 +19,7 @@ func (c *Client) GetProblem(ctx context.Context, id m.ID) (*m.Problem, error) {
 		if err == pgx.ErrNoRows {
 			return nil, ErrNotFound
 		}
-		return nil, fmt.Errorf("failed to get problem from database, err: %v", err)
+		return nil, fmt.Errorf("failed to get problem from database, err: <%v>", err)
 	}
 
 	return &p, nil
@@ -39,7 +39,7 @@ func (c *Client) GetProblemByProblemID(ctx context.Context, problemID m.ID) (*m.
 		if err == pgx.ErrNoRows {
 			return nil, ErrNotFound
 		}
-		return nil, fmt.Errorf("failed to get problem from database, err: %v", err)
+		return nil, fmt.Errorf("failed to get problem from database, err: <%v>", err)
 	}
 
 	return &p, nil

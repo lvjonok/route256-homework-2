@@ -36,7 +36,7 @@ func (c *Client) GetUpdatesChan() <-chan *Update {
 
 			updates, err := c.getUpdates()
 			if err != nil {
-				log.Printf("failed to get updates, %v", err)
+				log.Printf("failed to get updates, err: <%v>", err)
 				log.Printf("retry in 5 secs...")
 				time.Sleep(5 * time.Second)
 			}

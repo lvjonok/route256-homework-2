@@ -26,7 +26,7 @@ func (c *Client) GetProblemByTaskNumber(ctx context.Context, taskNumber int) (*m
 		if err == pgx.ErrNoRows {
 			return nil, ErrNotFound
 		}
-		return nil, fmt.Errorf("failed to get problem from database, err: %v", err)
+		return nil, fmt.Errorf("failed to get problem from database, err: <%v>", err)
 	}
 	return &p, nil
 }
