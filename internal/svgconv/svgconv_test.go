@@ -12,7 +12,8 @@ func TestImagePartToBytes(t *testing.T) {
 	// test preparation
 	_, err := os.ReadDir("tmp")
 	if err != nil {
-		os.Mkdir("tmp", 0777)
+		merr := os.Mkdir("tmp", 0777)
+		require.NoError(t, merr)
 	}
 
 	img, err := svgconv.ImagePartToBytes("https://ege.sdamgia.ru/get_file?id=29490")

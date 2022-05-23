@@ -114,7 +114,7 @@ func (s *Service) ParseProblems(ctx context.Context) error {
 				continue
 			}
 
-			imageId, err := s.AddImage(ctx, imgbytes, dbproblem.ProblemImage) // s.DB.CreateImage(ctx, imgbytes, dbproblem.ProblemImage)
+			imageId, err := s.AddImage(ctx, imgbytes, dbproblem.ProblemImage)
 			if err != nil {
 				log.Printf("failed to update image in database, err: <%v>, continuing", err)
 				continue
