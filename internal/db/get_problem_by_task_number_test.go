@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
+	"gitlab.ozon.dev/lvjonok/homework-2/internal/db"
 	"gitlab.ozon.dev/lvjonok/homework-2/internal/models"
 )
 
@@ -27,4 +28,11 @@ func TestProblemByTaskNumber(t *testing.T) {
 	// we should get only updated problem
 	require.NotEqual(t, res.ID, *probID)
 	require.Equal(t, res.ID, *probID2)
+}
+
+func TestProblemByTaskNumberNotFound(t *testing.T) {
+	client, ctx := Prepare(t)
+
+	_, err := client.GetProblemByTaskNumber(ctx, 213456)
+	require.Equal(t, db.ErrNotFound, err)
 }

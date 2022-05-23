@@ -19,8 +19,12 @@ type DB interface {
 	UpdateAbortedSubmissions(ctx context.Context, chatID models.ID) error
 
 	CreateImage(context.Context, []byte, string) (*models.ID, error)
-	GetImage(context.Context, models.ID) ([]byte, error)
+	GetImage(context.Context, models.ID) (*models.Image, error)
 
 	GetStat(context.Context, models.ID) (*models.Statistics, error)
 	GetRating(context.Context, models.ID) (*models.Rating, error)
+
+	GetProblemByProblemID(context.Context, models.ID) (*models.Problem, error)
+	GetCategoryByID(context.Context, models.ID) (*models.Category, error)
+	GetImageByHref(context.Context, string) (*models.Image, error)
 }

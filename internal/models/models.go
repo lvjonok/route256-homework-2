@@ -1,5 +1,9 @@
 package models
 
+import (
+	"bytes"
+)
+
 type ID int
 
 // Corresponds to submission result
@@ -21,11 +25,35 @@ type Problem struct {
 	Answer       string
 }
 
+func (p *Problem) Equal(another *Problem) bool {
+	equalParts := true
+	for idx := 0; idx < len(p.Parts); idx++ {
+		if len(p.Parts) <= idx || p.Parts[idx] != another.Parts[idx] {
+			equalParts = false
+		}
+	}
+	if len(p.Parts) != len(another.Parts) {
+		equalParts = false
+	}
+
+	return p.CategoryID == another.CategoryID &&
+		equalParts &&
+		p.ProblemID == another.ProblemID &&
+		p.Answer == another.Answer &&
+		p.ProblemImage == another.ProblemImage
+}
+
 type Category struct {
 	ID         ID
 	CategoryID ID
 	TaskNumber int
 	Title      string
+}
+
+func (c *Category) Equal(another *Category) bool {
+	return c.TaskNumber == another.TaskNumber &&
+		c.Title == another.Title &&
+		c.CategoryID == another.CategoryID
 }
 
 type Submission struct {
@@ -48,4 +76,14 @@ type Statistics struct {
 type Rating struct {
 	Position int
 	All      int
+}
+
+type Image struct {
+	ID      ID
+	Content []byte
+	Href    string
+}
+
+func (i *Image) Equal(another *Image) bool {
+	return bytes.Equal(i.Content, another.Content) && i.Href == another.Href
 }

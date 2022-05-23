@@ -42,11 +42,23 @@ type DBMock struct {
 	beforeCreateSubmissionCounter uint64
 	CreateSubmissionMock          mDBMockCreateSubmission
 
-	funcGetImage          func(ctx context.Context, i1 models.ID) (ba1 []byte, err error)
+	funcGetCategoryByID          func(ctx context.Context, i1 models.ID) (cp1 *models.Category, err error)
+	inspectFuncGetCategoryByID   func(ctx context.Context, i1 models.ID)
+	afterGetCategoryByIDCounter  uint64
+	beforeGetCategoryByIDCounter uint64
+	GetCategoryByIDMock          mDBMockGetCategoryByID
+
+	funcGetImage          func(ctx context.Context, i1 models.ID) (ip1 *models.Image, err error)
 	inspectFuncGetImage   func(ctx context.Context, i1 models.ID)
 	afterGetImageCounter  uint64
 	beforeGetImageCounter uint64
 	GetImageMock          mDBMockGetImage
+
+	funcGetImageByHref          func(ctx context.Context, s1 string) (ip1 *models.Image, err error)
+	inspectFuncGetImageByHref   func(ctx context.Context, s1 string)
+	afterGetImageByHrefCounter  uint64
+	beforeGetImageByHrefCounter uint64
+	GetImageByHrefMock          mDBMockGetImageByHref
 
 	funcGetLastUserSubmission          func(ctx context.Context, i1 models.ID) (sp1 *models.Submission, err error)
 	inspectFuncGetLastUserSubmission   func(ctx context.Context, i1 models.ID)
@@ -59,6 +71,12 @@ type DBMock struct {
 	afterGetProblemCounter  uint64
 	beforeGetProblemCounter uint64
 	GetProblemMock          mDBMockGetProblem
+
+	funcGetProblemByProblemID          func(ctx context.Context, i1 models.ID) (pp1 *models.Problem, err error)
+	inspectFuncGetProblemByProblemID   func(ctx context.Context, i1 models.ID)
+	afterGetProblemByProblemIDCounter  uint64
+	beforeGetProblemByProblemIDCounter uint64
+	GetProblemByProblemIDMock          mDBMockGetProblemByProblemID
 
 	funcGetProblemByTaskNumber          func(ctx context.Context, i1 int) (pp1 *models.Problem, err error)
 	inspectFuncGetProblemByTaskNumber   func(ctx context.Context, i1 int)
@@ -110,14 +128,23 @@ func NewDBMock(t minimock.Tester) *DBMock {
 	m.CreateSubmissionMock = mDBMockCreateSubmission{mock: m}
 	m.CreateSubmissionMock.callArgs = []*DBMockCreateSubmissionParams{}
 
+	m.GetCategoryByIDMock = mDBMockGetCategoryByID{mock: m}
+	m.GetCategoryByIDMock.callArgs = []*DBMockGetCategoryByIDParams{}
+
 	m.GetImageMock = mDBMockGetImage{mock: m}
 	m.GetImageMock.callArgs = []*DBMockGetImageParams{}
+
+	m.GetImageByHrefMock = mDBMockGetImageByHref{mock: m}
+	m.GetImageByHrefMock.callArgs = []*DBMockGetImageByHrefParams{}
 
 	m.GetLastUserSubmissionMock = mDBMockGetLastUserSubmission{mock: m}
 	m.GetLastUserSubmissionMock.callArgs = []*DBMockGetLastUserSubmissionParams{}
 
 	m.GetProblemMock = mDBMockGetProblem{mock: m}
 	m.GetProblemMock.callArgs = []*DBMockGetProblemParams{}
+
+	m.GetProblemByProblemIDMock = mDBMockGetProblemByProblemID{mock: m}
+	m.GetProblemByProblemIDMock.callArgs = []*DBMockGetProblemByProblemIDParams{}
 
 	m.GetProblemByTaskNumberMock = mDBMockGetProblemByTaskNumber{mock: m}
 	m.GetProblemByTaskNumberMock.callArgs = []*DBMockGetProblemByTaskNumberParams{}
@@ -1006,6 +1033,223 @@ func (m *DBMock) MinimockCreateSubmissionInspect() {
 	}
 }
 
+type mDBMockGetCategoryByID struct {
+	mock               *DBMock
+	defaultExpectation *DBMockGetCategoryByIDExpectation
+	expectations       []*DBMockGetCategoryByIDExpectation
+
+	callArgs []*DBMockGetCategoryByIDParams
+	mutex    sync.RWMutex
+}
+
+// DBMockGetCategoryByIDExpectation specifies expectation struct of the DB.GetCategoryByID
+type DBMockGetCategoryByIDExpectation struct {
+	mock    *DBMock
+	params  *DBMockGetCategoryByIDParams
+	results *DBMockGetCategoryByIDResults
+	Counter uint64
+}
+
+// DBMockGetCategoryByIDParams contains parameters of the DB.GetCategoryByID
+type DBMockGetCategoryByIDParams struct {
+	ctx context.Context
+	i1  models.ID
+}
+
+// DBMockGetCategoryByIDResults contains results of the DB.GetCategoryByID
+type DBMockGetCategoryByIDResults struct {
+	cp1 *models.Category
+	err error
+}
+
+// Expect sets up expected params for DB.GetCategoryByID
+func (mmGetCategoryByID *mDBMockGetCategoryByID) Expect(ctx context.Context, i1 models.ID) *mDBMockGetCategoryByID {
+	if mmGetCategoryByID.mock.funcGetCategoryByID != nil {
+		mmGetCategoryByID.mock.t.Fatalf("DBMock.GetCategoryByID mock is already set by Set")
+	}
+
+	if mmGetCategoryByID.defaultExpectation == nil {
+		mmGetCategoryByID.defaultExpectation = &DBMockGetCategoryByIDExpectation{}
+	}
+
+	mmGetCategoryByID.defaultExpectation.params = &DBMockGetCategoryByIDParams{ctx, i1}
+	for _, e := range mmGetCategoryByID.expectations {
+		if minimock.Equal(e.params, mmGetCategoryByID.defaultExpectation.params) {
+			mmGetCategoryByID.mock.t.Fatalf("Expectation set by When has same params: %#v", *mmGetCategoryByID.defaultExpectation.params)
+		}
+	}
+
+	return mmGetCategoryByID
+}
+
+// Inspect accepts an inspector function that has same arguments as the DB.GetCategoryByID
+func (mmGetCategoryByID *mDBMockGetCategoryByID) Inspect(f func(ctx context.Context, i1 models.ID)) *mDBMockGetCategoryByID {
+	if mmGetCategoryByID.mock.inspectFuncGetCategoryByID != nil {
+		mmGetCategoryByID.mock.t.Fatalf("Inspect function is already set for DBMock.GetCategoryByID")
+	}
+
+	mmGetCategoryByID.mock.inspectFuncGetCategoryByID = f
+
+	return mmGetCategoryByID
+}
+
+// Return sets up results that will be returned by DB.GetCategoryByID
+func (mmGetCategoryByID *mDBMockGetCategoryByID) Return(cp1 *models.Category, err error) *DBMock {
+	if mmGetCategoryByID.mock.funcGetCategoryByID != nil {
+		mmGetCategoryByID.mock.t.Fatalf("DBMock.GetCategoryByID mock is already set by Set")
+	}
+
+	if mmGetCategoryByID.defaultExpectation == nil {
+		mmGetCategoryByID.defaultExpectation = &DBMockGetCategoryByIDExpectation{mock: mmGetCategoryByID.mock}
+	}
+	mmGetCategoryByID.defaultExpectation.results = &DBMockGetCategoryByIDResults{cp1, err}
+	return mmGetCategoryByID.mock
+}
+
+//Set uses given function f to mock the DB.GetCategoryByID method
+func (mmGetCategoryByID *mDBMockGetCategoryByID) Set(f func(ctx context.Context, i1 models.ID) (cp1 *models.Category, err error)) *DBMock {
+	if mmGetCategoryByID.defaultExpectation != nil {
+		mmGetCategoryByID.mock.t.Fatalf("Default expectation is already set for the DB.GetCategoryByID method")
+	}
+
+	if len(mmGetCategoryByID.expectations) > 0 {
+		mmGetCategoryByID.mock.t.Fatalf("Some expectations are already set for the DB.GetCategoryByID method")
+	}
+
+	mmGetCategoryByID.mock.funcGetCategoryByID = f
+	return mmGetCategoryByID.mock
+}
+
+// When sets expectation for the DB.GetCategoryByID which will trigger the result defined by the following
+// Then helper
+func (mmGetCategoryByID *mDBMockGetCategoryByID) When(ctx context.Context, i1 models.ID) *DBMockGetCategoryByIDExpectation {
+	if mmGetCategoryByID.mock.funcGetCategoryByID != nil {
+		mmGetCategoryByID.mock.t.Fatalf("DBMock.GetCategoryByID mock is already set by Set")
+	}
+
+	expectation := &DBMockGetCategoryByIDExpectation{
+		mock:   mmGetCategoryByID.mock,
+		params: &DBMockGetCategoryByIDParams{ctx, i1},
+	}
+	mmGetCategoryByID.expectations = append(mmGetCategoryByID.expectations, expectation)
+	return expectation
+}
+
+// Then sets up DB.GetCategoryByID return parameters for the expectation previously defined by the When method
+func (e *DBMockGetCategoryByIDExpectation) Then(cp1 *models.Category, err error) *DBMock {
+	e.results = &DBMockGetCategoryByIDResults{cp1, err}
+	return e.mock
+}
+
+// GetCategoryByID implements DB
+func (mmGetCategoryByID *DBMock) GetCategoryByID(ctx context.Context, i1 models.ID) (cp1 *models.Category, err error) {
+	mm_atomic.AddUint64(&mmGetCategoryByID.beforeGetCategoryByIDCounter, 1)
+	defer mm_atomic.AddUint64(&mmGetCategoryByID.afterGetCategoryByIDCounter, 1)
+
+	if mmGetCategoryByID.inspectFuncGetCategoryByID != nil {
+		mmGetCategoryByID.inspectFuncGetCategoryByID(ctx, i1)
+	}
+
+	mm_params := &DBMockGetCategoryByIDParams{ctx, i1}
+
+	// Record call args
+	mmGetCategoryByID.GetCategoryByIDMock.mutex.Lock()
+	mmGetCategoryByID.GetCategoryByIDMock.callArgs = append(mmGetCategoryByID.GetCategoryByIDMock.callArgs, mm_params)
+	mmGetCategoryByID.GetCategoryByIDMock.mutex.Unlock()
+
+	for _, e := range mmGetCategoryByID.GetCategoryByIDMock.expectations {
+		if minimock.Equal(e.params, mm_params) {
+			mm_atomic.AddUint64(&e.Counter, 1)
+			return e.results.cp1, e.results.err
+		}
+	}
+
+	if mmGetCategoryByID.GetCategoryByIDMock.defaultExpectation != nil {
+		mm_atomic.AddUint64(&mmGetCategoryByID.GetCategoryByIDMock.defaultExpectation.Counter, 1)
+		mm_want := mmGetCategoryByID.GetCategoryByIDMock.defaultExpectation.params
+		mm_got := DBMockGetCategoryByIDParams{ctx, i1}
+		if mm_want != nil && !minimock.Equal(*mm_want, mm_got) {
+			mmGetCategoryByID.t.Errorf("DBMock.GetCategoryByID got unexpected parameters, want: %#v, got: %#v%s\n", *mm_want, mm_got, minimock.Diff(*mm_want, mm_got))
+		}
+
+		mm_results := mmGetCategoryByID.GetCategoryByIDMock.defaultExpectation.results
+		if mm_results == nil {
+			mmGetCategoryByID.t.Fatal("No results are set for the DBMock.GetCategoryByID")
+		}
+		return (*mm_results).cp1, (*mm_results).err
+	}
+	if mmGetCategoryByID.funcGetCategoryByID != nil {
+		return mmGetCategoryByID.funcGetCategoryByID(ctx, i1)
+	}
+	mmGetCategoryByID.t.Fatalf("Unexpected call to DBMock.GetCategoryByID. %v %v", ctx, i1)
+	return
+}
+
+// GetCategoryByIDAfterCounter returns a count of finished DBMock.GetCategoryByID invocations
+func (mmGetCategoryByID *DBMock) GetCategoryByIDAfterCounter() uint64 {
+	return mm_atomic.LoadUint64(&mmGetCategoryByID.afterGetCategoryByIDCounter)
+}
+
+// GetCategoryByIDBeforeCounter returns a count of DBMock.GetCategoryByID invocations
+func (mmGetCategoryByID *DBMock) GetCategoryByIDBeforeCounter() uint64 {
+	return mm_atomic.LoadUint64(&mmGetCategoryByID.beforeGetCategoryByIDCounter)
+}
+
+// Calls returns a list of arguments used in each call to DBMock.GetCategoryByID.
+// The list is in the same order as the calls were made (i.e. recent calls have a higher index)
+func (mmGetCategoryByID *mDBMockGetCategoryByID) Calls() []*DBMockGetCategoryByIDParams {
+	mmGetCategoryByID.mutex.RLock()
+
+	argCopy := make([]*DBMockGetCategoryByIDParams, len(mmGetCategoryByID.callArgs))
+	copy(argCopy, mmGetCategoryByID.callArgs)
+
+	mmGetCategoryByID.mutex.RUnlock()
+
+	return argCopy
+}
+
+// MinimockGetCategoryByIDDone returns true if the count of the GetCategoryByID invocations corresponds
+// the number of defined expectations
+func (m *DBMock) MinimockGetCategoryByIDDone() bool {
+	for _, e := range m.GetCategoryByIDMock.expectations {
+		if mm_atomic.LoadUint64(&e.Counter) < 1 {
+			return false
+		}
+	}
+
+	// if default expectation was set then invocations count should be greater than zero
+	if m.GetCategoryByIDMock.defaultExpectation != nil && mm_atomic.LoadUint64(&m.afterGetCategoryByIDCounter) < 1 {
+		return false
+	}
+	// if func was set then invocations count should be greater than zero
+	if m.funcGetCategoryByID != nil && mm_atomic.LoadUint64(&m.afterGetCategoryByIDCounter) < 1 {
+		return false
+	}
+	return true
+}
+
+// MinimockGetCategoryByIDInspect logs each unmet expectation
+func (m *DBMock) MinimockGetCategoryByIDInspect() {
+	for _, e := range m.GetCategoryByIDMock.expectations {
+		if mm_atomic.LoadUint64(&e.Counter) < 1 {
+			m.t.Errorf("Expected call to DBMock.GetCategoryByID with params: %#v", *e.params)
+		}
+	}
+
+	// if default expectation was set then invocations count should be greater than zero
+	if m.GetCategoryByIDMock.defaultExpectation != nil && mm_atomic.LoadUint64(&m.afterGetCategoryByIDCounter) < 1 {
+		if m.GetCategoryByIDMock.defaultExpectation.params == nil {
+			m.t.Error("Expected call to DBMock.GetCategoryByID")
+		} else {
+			m.t.Errorf("Expected call to DBMock.GetCategoryByID with params: %#v", *m.GetCategoryByIDMock.defaultExpectation.params)
+		}
+	}
+	// if func was set then invocations count should be greater than zero
+	if m.funcGetCategoryByID != nil && mm_atomic.LoadUint64(&m.afterGetCategoryByIDCounter) < 1 {
+		m.t.Error("Expected call to DBMock.GetCategoryByID")
+	}
+}
+
 type mDBMockGetImage struct {
 	mock               *DBMock
 	defaultExpectation *DBMockGetImageExpectation
@@ -1031,7 +1275,7 @@ type DBMockGetImageParams struct {
 
 // DBMockGetImageResults contains results of the DB.GetImage
 type DBMockGetImageResults struct {
-	ba1 []byte
+	ip1 *models.Image
 	err error
 }
 
@@ -1067,7 +1311,7 @@ func (mmGetImage *mDBMockGetImage) Inspect(f func(ctx context.Context, i1 models
 }
 
 // Return sets up results that will be returned by DB.GetImage
-func (mmGetImage *mDBMockGetImage) Return(ba1 []byte, err error) *DBMock {
+func (mmGetImage *mDBMockGetImage) Return(ip1 *models.Image, err error) *DBMock {
 	if mmGetImage.mock.funcGetImage != nil {
 		mmGetImage.mock.t.Fatalf("DBMock.GetImage mock is already set by Set")
 	}
@@ -1075,12 +1319,12 @@ func (mmGetImage *mDBMockGetImage) Return(ba1 []byte, err error) *DBMock {
 	if mmGetImage.defaultExpectation == nil {
 		mmGetImage.defaultExpectation = &DBMockGetImageExpectation{mock: mmGetImage.mock}
 	}
-	mmGetImage.defaultExpectation.results = &DBMockGetImageResults{ba1, err}
+	mmGetImage.defaultExpectation.results = &DBMockGetImageResults{ip1, err}
 	return mmGetImage.mock
 }
 
 //Set uses given function f to mock the DB.GetImage method
-func (mmGetImage *mDBMockGetImage) Set(f func(ctx context.Context, i1 models.ID) (ba1 []byte, err error)) *DBMock {
+func (mmGetImage *mDBMockGetImage) Set(f func(ctx context.Context, i1 models.ID) (ip1 *models.Image, err error)) *DBMock {
 	if mmGetImage.defaultExpectation != nil {
 		mmGetImage.mock.t.Fatalf("Default expectation is already set for the DB.GetImage method")
 	}
@@ -1109,13 +1353,13 @@ func (mmGetImage *mDBMockGetImage) When(ctx context.Context, i1 models.ID) *DBMo
 }
 
 // Then sets up DB.GetImage return parameters for the expectation previously defined by the When method
-func (e *DBMockGetImageExpectation) Then(ba1 []byte, err error) *DBMock {
-	e.results = &DBMockGetImageResults{ba1, err}
+func (e *DBMockGetImageExpectation) Then(ip1 *models.Image, err error) *DBMock {
+	e.results = &DBMockGetImageResults{ip1, err}
 	return e.mock
 }
 
 // GetImage implements DB
-func (mmGetImage *DBMock) GetImage(ctx context.Context, i1 models.ID) (ba1 []byte, err error) {
+func (mmGetImage *DBMock) GetImage(ctx context.Context, i1 models.ID) (ip1 *models.Image, err error) {
 	mm_atomic.AddUint64(&mmGetImage.beforeGetImageCounter, 1)
 	defer mm_atomic.AddUint64(&mmGetImage.afterGetImageCounter, 1)
 
@@ -1133,7 +1377,7 @@ func (mmGetImage *DBMock) GetImage(ctx context.Context, i1 models.ID) (ba1 []byt
 	for _, e := range mmGetImage.GetImageMock.expectations {
 		if minimock.Equal(e.params, mm_params) {
 			mm_atomic.AddUint64(&e.Counter, 1)
-			return e.results.ba1, e.results.err
+			return e.results.ip1, e.results.err
 		}
 	}
 
@@ -1149,7 +1393,7 @@ func (mmGetImage *DBMock) GetImage(ctx context.Context, i1 models.ID) (ba1 []byt
 		if mm_results == nil {
 			mmGetImage.t.Fatal("No results are set for the DBMock.GetImage")
 		}
-		return (*mm_results).ba1, (*mm_results).err
+		return (*mm_results).ip1, (*mm_results).err
 	}
 	if mmGetImage.funcGetImage != nil {
 		return mmGetImage.funcGetImage(ctx, i1)
@@ -1220,6 +1464,223 @@ func (m *DBMock) MinimockGetImageInspect() {
 	// if func was set then invocations count should be greater than zero
 	if m.funcGetImage != nil && mm_atomic.LoadUint64(&m.afterGetImageCounter) < 1 {
 		m.t.Error("Expected call to DBMock.GetImage")
+	}
+}
+
+type mDBMockGetImageByHref struct {
+	mock               *DBMock
+	defaultExpectation *DBMockGetImageByHrefExpectation
+	expectations       []*DBMockGetImageByHrefExpectation
+
+	callArgs []*DBMockGetImageByHrefParams
+	mutex    sync.RWMutex
+}
+
+// DBMockGetImageByHrefExpectation specifies expectation struct of the DB.GetImageByHref
+type DBMockGetImageByHrefExpectation struct {
+	mock    *DBMock
+	params  *DBMockGetImageByHrefParams
+	results *DBMockGetImageByHrefResults
+	Counter uint64
+}
+
+// DBMockGetImageByHrefParams contains parameters of the DB.GetImageByHref
+type DBMockGetImageByHrefParams struct {
+	ctx context.Context
+	s1  string
+}
+
+// DBMockGetImageByHrefResults contains results of the DB.GetImageByHref
+type DBMockGetImageByHrefResults struct {
+	ip1 *models.Image
+	err error
+}
+
+// Expect sets up expected params for DB.GetImageByHref
+func (mmGetImageByHref *mDBMockGetImageByHref) Expect(ctx context.Context, s1 string) *mDBMockGetImageByHref {
+	if mmGetImageByHref.mock.funcGetImageByHref != nil {
+		mmGetImageByHref.mock.t.Fatalf("DBMock.GetImageByHref mock is already set by Set")
+	}
+
+	if mmGetImageByHref.defaultExpectation == nil {
+		mmGetImageByHref.defaultExpectation = &DBMockGetImageByHrefExpectation{}
+	}
+
+	mmGetImageByHref.defaultExpectation.params = &DBMockGetImageByHrefParams{ctx, s1}
+	for _, e := range mmGetImageByHref.expectations {
+		if minimock.Equal(e.params, mmGetImageByHref.defaultExpectation.params) {
+			mmGetImageByHref.mock.t.Fatalf("Expectation set by When has same params: %#v", *mmGetImageByHref.defaultExpectation.params)
+		}
+	}
+
+	return mmGetImageByHref
+}
+
+// Inspect accepts an inspector function that has same arguments as the DB.GetImageByHref
+func (mmGetImageByHref *mDBMockGetImageByHref) Inspect(f func(ctx context.Context, s1 string)) *mDBMockGetImageByHref {
+	if mmGetImageByHref.mock.inspectFuncGetImageByHref != nil {
+		mmGetImageByHref.mock.t.Fatalf("Inspect function is already set for DBMock.GetImageByHref")
+	}
+
+	mmGetImageByHref.mock.inspectFuncGetImageByHref = f
+
+	return mmGetImageByHref
+}
+
+// Return sets up results that will be returned by DB.GetImageByHref
+func (mmGetImageByHref *mDBMockGetImageByHref) Return(ip1 *models.Image, err error) *DBMock {
+	if mmGetImageByHref.mock.funcGetImageByHref != nil {
+		mmGetImageByHref.mock.t.Fatalf("DBMock.GetImageByHref mock is already set by Set")
+	}
+
+	if mmGetImageByHref.defaultExpectation == nil {
+		mmGetImageByHref.defaultExpectation = &DBMockGetImageByHrefExpectation{mock: mmGetImageByHref.mock}
+	}
+	mmGetImageByHref.defaultExpectation.results = &DBMockGetImageByHrefResults{ip1, err}
+	return mmGetImageByHref.mock
+}
+
+//Set uses given function f to mock the DB.GetImageByHref method
+func (mmGetImageByHref *mDBMockGetImageByHref) Set(f func(ctx context.Context, s1 string) (ip1 *models.Image, err error)) *DBMock {
+	if mmGetImageByHref.defaultExpectation != nil {
+		mmGetImageByHref.mock.t.Fatalf("Default expectation is already set for the DB.GetImageByHref method")
+	}
+
+	if len(mmGetImageByHref.expectations) > 0 {
+		mmGetImageByHref.mock.t.Fatalf("Some expectations are already set for the DB.GetImageByHref method")
+	}
+
+	mmGetImageByHref.mock.funcGetImageByHref = f
+	return mmGetImageByHref.mock
+}
+
+// When sets expectation for the DB.GetImageByHref which will trigger the result defined by the following
+// Then helper
+func (mmGetImageByHref *mDBMockGetImageByHref) When(ctx context.Context, s1 string) *DBMockGetImageByHrefExpectation {
+	if mmGetImageByHref.mock.funcGetImageByHref != nil {
+		mmGetImageByHref.mock.t.Fatalf("DBMock.GetImageByHref mock is already set by Set")
+	}
+
+	expectation := &DBMockGetImageByHrefExpectation{
+		mock:   mmGetImageByHref.mock,
+		params: &DBMockGetImageByHrefParams{ctx, s1},
+	}
+	mmGetImageByHref.expectations = append(mmGetImageByHref.expectations, expectation)
+	return expectation
+}
+
+// Then sets up DB.GetImageByHref return parameters for the expectation previously defined by the When method
+func (e *DBMockGetImageByHrefExpectation) Then(ip1 *models.Image, err error) *DBMock {
+	e.results = &DBMockGetImageByHrefResults{ip1, err}
+	return e.mock
+}
+
+// GetImageByHref implements DB
+func (mmGetImageByHref *DBMock) GetImageByHref(ctx context.Context, s1 string) (ip1 *models.Image, err error) {
+	mm_atomic.AddUint64(&mmGetImageByHref.beforeGetImageByHrefCounter, 1)
+	defer mm_atomic.AddUint64(&mmGetImageByHref.afterGetImageByHrefCounter, 1)
+
+	if mmGetImageByHref.inspectFuncGetImageByHref != nil {
+		mmGetImageByHref.inspectFuncGetImageByHref(ctx, s1)
+	}
+
+	mm_params := &DBMockGetImageByHrefParams{ctx, s1}
+
+	// Record call args
+	mmGetImageByHref.GetImageByHrefMock.mutex.Lock()
+	mmGetImageByHref.GetImageByHrefMock.callArgs = append(mmGetImageByHref.GetImageByHrefMock.callArgs, mm_params)
+	mmGetImageByHref.GetImageByHrefMock.mutex.Unlock()
+
+	for _, e := range mmGetImageByHref.GetImageByHrefMock.expectations {
+		if minimock.Equal(e.params, mm_params) {
+			mm_atomic.AddUint64(&e.Counter, 1)
+			return e.results.ip1, e.results.err
+		}
+	}
+
+	if mmGetImageByHref.GetImageByHrefMock.defaultExpectation != nil {
+		mm_atomic.AddUint64(&mmGetImageByHref.GetImageByHrefMock.defaultExpectation.Counter, 1)
+		mm_want := mmGetImageByHref.GetImageByHrefMock.defaultExpectation.params
+		mm_got := DBMockGetImageByHrefParams{ctx, s1}
+		if mm_want != nil && !minimock.Equal(*mm_want, mm_got) {
+			mmGetImageByHref.t.Errorf("DBMock.GetImageByHref got unexpected parameters, want: %#v, got: %#v%s\n", *mm_want, mm_got, minimock.Diff(*mm_want, mm_got))
+		}
+
+		mm_results := mmGetImageByHref.GetImageByHrefMock.defaultExpectation.results
+		if mm_results == nil {
+			mmGetImageByHref.t.Fatal("No results are set for the DBMock.GetImageByHref")
+		}
+		return (*mm_results).ip1, (*mm_results).err
+	}
+	if mmGetImageByHref.funcGetImageByHref != nil {
+		return mmGetImageByHref.funcGetImageByHref(ctx, s1)
+	}
+	mmGetImageByHref.t.Fatalf("Unexpected call to DBMock.GetImageByHref. %v %v", ctx, s1)
+	return
+}
+
+// GetImageByHrefAfterCounter returns a count of finished DBMock.GetImageByHref invocations
+func (mmGetImageByHref *DBMock) GetImageByHrefAfterCounter() uint64 {
+	return mm_atomic.LoadUint64(&mmGetImageByHref.afterGetImageByHrefCounter)
+}
+
+// GetImageByHrefBeforeCounter returns a count of DBMock.GetImageByHref invocations
+func (mmGetImageByHref *DBMock) GetImageByHrefBeforeCounter() uint64 {
+	return mm_atomic.LoadUint64(&mmGetImageByHref.beforeGetImageByHrefCounter)
+}
+
+// Calls returns a list of arguments used in each call to DBMock.GetImageByHref.
+// The list is in the same order as the calls were made (i.e. recent calls have a higher index)
+func (mmGetImageByHref *mDBMockGetImageByHref) Calls() []*DBMockGetImageByHrefParams {
+	mmGetImageByHref.mutex.RLock()
+
+	argCopy := make([]*DBMockGetImageByHrefParams, len(mmGetImageByHref.callArgs))
+	copy(argCopy, mmGetImageByHref.callArgs)
+
+	mmGetImageByHref.mutex.RUnlock()
+
+	return argCopy
+}
+
+// MinimockGetImageByHrefDone returns true if the count of the GetImageByHref invocations corresponds
+// the number of defined expectations
+func (m *DBMock) MinimockGetImageByHrefDone() bool {
+	for _, e := range m.GetImageByHrefMock.expectations {
+		if mm_atomic.LoadUint64(&e.Counter) < 1 {
+			return false
+		}
+	}
+
+	// if default expectation was set then invocations count should be greater than zero
+	if m.GetImageByHrefMock.defaultExpectation != nil && mm_atomic.LoadUint64(&m.afterGetImageByHrefCounter) < 1 {
+		return false
+	}
+	// if func was set then invocations count should be greater than zero
+	if m.funcGetImageByHref != nil && mm_atomic.LoadUint64(&m.afterGetImageByHrefCounter) < 1 {
+		return false
+	}
+	return true
+}
+
+// MinimockGetImageByHrefInspect logs each unmet expectation
+func (m *DBMock) MinimockGetImageByHrefInspect() {
+	for _, e := range m.GetImageByHrefMock.expectations {
+		if mm_atomic.LoadUint64(&e.Counter) < 1 {
+			m.t.Errorf("Expected call to DBMock.GetImageByHref with params: %#v", *e.params)
+		}
+	}
+
+	// if default expectation was set then invocations count should be greater than zero
+	if m.GetImageByHrefMock.defaultExpectation != nil && mm_atomic.LoadUint64(&m.afterGetImageByHrefCounter) < 1 {
+		if m.GetImageByHrefMock.defaultExpectation.params == nil {
+			m.t.Error("Expected call to DBMock.GetImageByHref")
+		} else {
+			m.t.Errorf("Expected call to DBMock.GetImageByHref with params: %#v", *m.GetImageByHrefMock.defaultExpectation.params)
+		}
+	}
+	// if func was set then invocations count should be greater than zero
+	if m.funcGetImageByHref != nil && mm_atomic.LoadUint64(&m.afterGetImageByHrefCounter) < 1 {
+		m.t.Error("Expected call to DBMock.GetImageByHref")
 	}
 }
 
@@ -1654,6 +2115,223 @@ func (m *DBMock) MinimockGetProblemInspect() {
 	// if func was set then invocations count should be greater than zero
 	if m.funcGetProblem != nil && mm_atomic.LoadUint64(&m.afterGetProblemCounter) < 1 {
 		m.t.Error("Expected call to DBMock.GetProblem")
+	}
+}
+
+type mDBMockGetProblemByProblemID struct {
+	mock               *DBMock
+	defaultExpectation *DBMockGetProblemByProblemIDExpectation
+	expectations       []*DBMockGetProblemByProblemIDExpectation
+
+	callArgs []*DBMockGetProblemByProblemIDParams
+	mutex    sync.RWMutex
+}
+
+// DBMockGetProblemByProblemIDExpectation specifies expectation struct of the DB.GetProblemByProblemID
+type DBMockGetProblemByProblemIDExpectation struct {
+	mock    *DBMock
+	params  *DBMockGetProblemByProblemIDParams
+	results *DBMockGetProblemByProblemIDResults
+	Counter uint64
+}
+
+// DBMockGetProblemByProblemIDParams contains parameters of the DB.GetProblemByProblemID
+type DBMockGetProblemByProblemIDParams struct {
+	ctx context.Context
+	i1  models.ID
+}
+
+// DBMockGetProblemByProblemIDResults contains results of the DB.GetProblemByProblemID
+type DBMockGetProblemByProblemIDResults struct {
+	pp1 *models.Problem
+	err error
+}
+
+// Expect sets up expected params for DB.GetProblemByProblemID
+func (mmGetProblemByProblemID *mDBMockGetProblemByProblemID) Expect(ctx context.Context, i1 models.ID) *mDBMockGetProblemByProblemID {
+	if mmGetProblemByProblemID.mock.funcGetProblemByProblemID != nil {
+		mmGetProblemByProblemID.mock.t.Fatalf("DBMock.GetProblemByProblemID mock is already set by Set")
+	}
+
+	if mmGetProblemByProblemID.defaultExpectation == nil {
+		mmGetProblemByProblemID.defaultExpectation = &DBMockGetProblemByProblemIDExpectation{}
+	}
+
+	mmGetProblemByProblemID.defaultExpectation.params = &DBMockGetProblemByProblemIDParams{ctx, i1}
+	for _, e := range mmGetProblemByProblemID.expectations {
+		if minimock.Equal(e.params, mmGetProblemByProblemID.defaultExpectation.params) {
+			mmGetProblemByProblemID.mock.t.Fatalf("Expectation set by When has same params: %#v", *mmGetProblemByProblemID.defaultExpectation.params)
+		}
+	}
+
+	return mmGetProblemByProblemID
+}
+
+// Inspect accepts an inspector function that has same arguments as the DB.GetProblemByProblemID
+func (mmGetProblemByProblemID *mDBMockGetProblemByProblemID) Inspect(f func(ctx context.Context, i1 models.ID)) *mDBMockGetProblemByProblemID {
+	if mmGetProblemByProblemID.mock.inspectFuncGetProblemByProblemID != nil {
+		mmGetProblemByProblemID.mock.t.Fatalf("Inspect function is already set for DBMock.GetProblemByProblemID")
+	}
+
+	mmGetProblemByProblemID.mock.inspectFuncGetProblemByProblemID = f
+
+	return mmGetProblemByProblemID
+}
+
+// Return sets up results that will be returned by DB.GetProblemByProblemID
+func (mmGetProblemByProblemID *mDBMockGetProblemByProblemID) Return(pp1 *models.Problem, err error) *DBMock {
+	if mmGetProblemByProblemID.mock.funcGetProblemByProblemID != nil {
+		mmGetProblemByProblemID.mock.t.Fatalf("DBMock.GetProblemByProblemID mock is already set by Set")
+	}
+
+	if mmGetProblemByProblemID.defaultExpectation == nil {
+		mmGetProblemByProblemID.defaultExpectation = &DBMockGetProblemByProblemIDExpectation{mock: mmGetProblemByProblemID.mock}
+	}
+	mmGetProblemByProblemID.defaultExpectation.results = &DBMockGetProblemByProblemIDResults{pp1, err}
+	return mmGetProblemByProblemID.mock
+}
+
+//Set uses given function f to mock the DB.GetProblemByProblemID method
+func (mmGetProblemByProblemID *mDBMockGetProblemByProblemID) Set(f func(ctx context.Context, i1 models.ID) (pp1 *models.Problem, err error)) *DBMock {
+	if mmGetProblemByProblemID.defaultExpectation != nil {
+		mmGetProblemByProblemID.mock.t.Fatalf("Default expectation is already set for the DB.GetProblemByProblemID method")
+	}
+
+	if len(mmGetProblemByProblemID.expectations) > 0 {
+		mmGetProblemByProblemID.mock.t.Fatalf("Some expectations are already set for the DB.GetProblemByProblemID method")
+	}
+
+	mmGetProblemByProblemID.mock.funcGetProblemByProblemID = f
+	return mmGetProblemByProblemID.mock
+}
+
+// When sets expectation for the DB.GetProblemByProblemID which will trigger the result defined by the following
+// Then helper
+func (mmGetProblemByProblemID *mDBMockGetProblemByProblemID) When(ctx context.Context, i1 models.ID) *DBMockGetProblemByProblemIDExpectation {
+	if mmGetProblemByProblemID.mock.funcGetProblemByProblemID != nil {
+		mmGetProblemByProblemID.mock.t.Fatalf("DBMock.GetProblemByProblemID mock is already set by Set")
+	}
+
+	expectation := &DBMockGetProblemByProblemIDExpectation{
+		mock:   mmGetProblemByProblemID.mock,
+		params: &DBMockGetProblemByProblemIDParams{ctx, i1},
+	}
+	mmGetProblemByProblemID.expectations = append(mmGetProblemByProblemID.expectations, expectation)
+	return expectation
+}
+
+// Then sets up DB.GetProblemByProblemID return parameters for the expectation previously defined by the When method
+func (e *DBMockGetProblemByProblemIDExpectation) Then(pp1 *models.Problem, err error) *DBMock {
+	e.results = &DBMockGetProblemByProblemIDResults{pp1, err}
+	return e.mock
+}
+
+// GetProblemByProblemID implements DB
+func (mmGetProblemByProblemID *DBMock) GetProblemByProblemID(ctx context.Context, i1 models.ID) (pp1 *models.Problem, err error) {
+	mm_atomic.AddUint64(&mmGetProblemByProblemID.beforeGetProblemByProblemIDCounter, 1)
+	defer mm_atomic.AddUint64(&mmGetProblemByProblemID.afterGetProblemByProblemIDCounter, 1)
+
+	if mmGetProblemByProblemID.inspectFuncGetProblemByProblemID != nil {
+		mmGetProblemByProblemID.inspectFuncGetProblemByProblemID(ctx, i1)
+	}
+
+	mm_params := &DBMockGetProblemByProblemIDParams{ctx, i1}
+
+	// Record call args
+	mmGetProblemByProblemID.GetProblemByProblemIDMock.mutex.Lock()
+	mmGetProblemByProblemID.GetProblemByProblemIDMock.callArgs = append(mmGetProblemByProblemID.GetProblemByProblemIDMock.callArgs, mm_params)
+	mmGetProblemByProblemID.GetProblemByProblemIDMock.mutex.Unlock()
+
+	for _, e := range mmGetProblemByProblemID.GetProblemByProblemIDMock.expectations {
+		if minimock.Equal(e.params, mm_params) {
+			mm_atomic.AddUint64(&e.Counter, 1)
+			return e.results.pp1, e.results.err
+		}
+	}
+
+	if mmGetProblemByProblemID.GetProblemByProblemIDMock.defaultExpectation != nil {
+		mm_atomic.AddUint64(&mmGetProblemByProblemID.GetProblemByProblemIDMock.defaultExpectation.Counter, 1)
+		mm_want := mmGetProblemByProblemID.GetProblemByProblemIDMock.defaultExpectation.params
+		mm_got := DBMockGetProblemByProblemIDParams{ctx, i1}
+		if mm_want != nil && !minimock.Equal(*mm_want, mm_got) {
+			mmGetProblemByProblemID.t.Errorf("DBMock.GetProblemByProblemID got unexpected parameters, want: %#v, got: %#v%s\n", *mm_want, mm_got, minimock.Diff(*mm_want, mm_got))
+		}
+
+		mm_results := mmGetProblemByProblemID.GetProblemByProblemIDMock.defaultExpectation.results
+		if mm_results == nil {
+			mmGetProblemByProblemID.t.Fatal("No results are set for the DBMock.GetProblemByProblemID")
+		}
+		return (*mm_results).pp1, (*mm_results).err
+	}
+	if mmGetProblemByProblemID.funcGetProblemByProblemID != nil {
+		return mmGetProblemByProblemID.funcGetProblemByProblemID(ctx, i1)
+	}
+	mmGetProblemByProblemID.t.Fatalf("Unexpected call to DBMock.GetProblemByProblemID. %v %v", ctx, i1)
+	return
+}
+
+// GetProblemByProblemIDAfterCounter returns a count of finished DBMock.GetProblemByProblemID invocations
+func (mmGetProblemByProblemID *DBMock) GetProblemByProblemIDAfterCounter() uint64 {
+	return mm_atomic.LoadUint64(&mmGetProblemByProblemID.afterGetProblemByProblemIDCounter)
+}
+
+// GetProblemByProblemIDBeforeCounter returns a count of DBMock.GetProblemByProblemID invocations
+func (mmGetProblemByProblemID *DBMock) GetProblemByProblemIDBeforeCounter() uint64 {
+	return mm_atomic.LoadUint64(&mmGetProblemByProblemID.beforeGetProblemByProblemIDCounter)
+}
+
+// Calls returns a list of arguments used in each call to DBMock.GetProblemByProblemID.
+// The list is in the same order as the calls were made (i.e. recent calls have a higher index)
+func (mmGetProblemByProblemID *mDBMockGetProblemByProblemID) Calls() []*DBMockGetProblemByProblemIDParams {
+	mmGetProblemByProblemID.mutex.RLock()
+
+	argCopy := make([]*DBMockGetProblemByProblemIDParams, len(mmGetProblemByProblemID.callArgs))
+	copy(argCopy, mmGetProblemByProblemID.callArgs)
+
+	mmGetProblemByProblemID.mutex.RUnlock()
+
+	return argCopy
+}
+
+// MinimockGetProblemByProblemIDDone returns true if the count of the GetProblemByProblemID invocations corresponds
+// the number of defined expectations
+func (m *DBMock) MinimockGetProblemByProblemIDDone() bool {
+	for _, e := range m.GetProblemByProblemIDMock.expectations {
+		if mm_atomic.LoadUint64(&e.Counter) < 1 {
+			return false
+		}
+	}
+
+	// if default expectation was set then invocations count should be greater than zero
+	if m.GetProblemByProblemIDMock.defaultExpectation != nil && mm_atomic.LoadUint64(&m.afterGetProblemByProblemIDCounter) < 1 {
+		return false
+	}
+	// if func was set then invocations count should be greater than zero
+	if m.funcGetProblemByProblemID != nil && mm_atomic.LoadUint64(&m.afterGetProblemByProblemIDCounter) < 1 {
+		return false
+	}
+	return true
+}
+
+// MinimockGetProblemByProblemIDInspect logs each unmet expectation
+func (m *DBMock) MinimockGetProblemByProblemIDInspect() {
+	for _, e := range m.GetProblemByProblemIDMock.expectations {
+		if mm_atomic.LoadUint64(&e.Counter) < 1 {
+			m.t.Errorf("Expected call to DBMock.GetProblemByProblemID with params: %#v", *e.params)
+		}
+	}
+
+	// if default expectation was set then invocations count should be greater than zero
+	if m.GetProblemByProblemIDMock.defaultExpectation != nil && mm_atomic.LoadUint64(&m.afterGetProblemByProblemIDCounter) < 1 {
+		if m.GetProblemByProblemIDMock.defaultExpectation.params == nil {
+			m.t.Error("Expected call to DBMock.GetProblemByProblemID")
+		} else {
+			m.t.Errorf("Expected call to DBMock.GetProblemByProblemID with params: %#v", *m.GetProblemByProblemIDMock.defaultExpectation.params)
+		}
+	}
+	// if func was set then invocations count should be greater than zero
+	if m.funcGetProblemByProblemID != nil && mm_atomic.LoadUint64(&m.afterGetProblemByProblemIDCounter) < 1 {
+		m.t.Error("Expected call to DBMock.GetProblemByProblemID")
 	}
 }
 
@@ -2751,11 +3429,17 @@ func (m *DBMock) MinimockFinish() {
 
 		m.MinimockCreateSubmissionInspect()
 
+		m.MinimockGetCategoryByIDInspect()
+
 		m.MinimockGetImageInspect()
+
+		m.MinimockGetImageByHrefInspect()
 
 		m.MinimockGetLastUserSubmissionInspect()
 
 		m.MinimockGetProblemInspect()
+
+		m.MinimockGetProblemByProblemIDInspect()
 
 		m.MinimockGetProblemByTaskNumberInspect()
 
@@ -2793,9 +3477,12 @@ func (m *DBMock) minimockDone() bool {
 		m.MinimockCreateImageDone() &&
 		m.MinimockCreateProblemDone() &&
 		m.MinimockCreateSubmissionDone() &&
+		m.MinimockGetCategoryByIDDone() &&
 		m.MinimockGetImageDone() &&
+		m.MinimockGetImageByHrefDone() &&
 		m.MinimockGetLastUserSubmissionDone() &&
 		m.MinimockGetProblemDone() &&
+		m.MinimockGetProblemByProblemIDDone() &&
 		m.MinimockGetProblemByTaskNumberDone() &&
 		m.MinimockGetRatingDone() &&
 		m.MinimockGetStatDone() &&

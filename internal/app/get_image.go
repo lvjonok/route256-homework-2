@@ -15,5 +15,5 @@ func (s *Service) GetImage(ctx context.Context, req *pb.GetImageRequest) (*pb.Ge
 		return nil, status.Errorf(codes.Internal, "failed to get image by id, err: %v", err)
 	}
 
-	return &pb.GetImageResponse{Image: image}, nil
+	return &pb.GetImageResponse{Image: image.Content}, nil
 }

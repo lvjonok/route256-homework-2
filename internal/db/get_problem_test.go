@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
+	"gitlab.ozon.dev/lvjonok/homework-2/internal/db"
 	"gitlab.ozon.dev/lvjonok/homework-2/internal/models"
 )
 
@@ -24,4 +25,11 @@ func TestGetProblem(t *testing.T) {
 	require.Equal(t, models.ID(12345), res.ProblemID)
 	require.Equal(t, []string{"some cool description"}, res.Parts)
 	require.Equal(t, "10", res.Answer)
+}
+
+func TestGetProblemNotFound(t *testing.T) {
+	client, ctx := Prepare(t)
+
+	_, err := client.GetProblem(ctx, models.ID(1))
+	require.Equal(t, db.ErrNotFound, err)
 }

@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/jackc/pgx/v4"
 	m "gitlab.ozon.dev/lvjonok/homework-2/internal/models"
 )
 
@@ -22,6 +23,9 @@ func (c *Client) GetProblemByTaskNumber(ctx context.Context, taskNumber int) (*m
 	err := c.pool.QueryRow(ctx, query, taskNumber).
 		Scan(&p.ID, &p.ProblemID, &p.CategoryID, &p.ProblemImage, &p.Parts, &p.Answer)
 	if err != nil {
+		if err == pgx.ErrNoRows {
+			return nil, ErrNotFound
+		}
 		return nil, fmt.Errorf("failed to get problem from database, err: %v", err)
 	}
 	return &p, nil

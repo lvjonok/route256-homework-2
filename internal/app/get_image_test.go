@@ -8,6 +8,7 @@ import (
 	"github.com/gojuno/minimock/v3"
 	"github.com/stretchr/testify/require"
 	"gitlab.ozon.dev/lvjonok/homework-2/internal/app"
+	"gitlab.ozon.dev/lvjonok/homework-2/internal/models"
 	homework_2 "gitlab.ozon.dev/lvjonok/homework-2/pkg/api"
 )
 
@@ -16,7 +17,7 @@ func TestGetImage(t *testing.T) {
 	defer mc.Finish()
 
 	mockDB := app.NewDBMock(mc)
-	mockDB.GetImageMock.Return([]byte{0, 1, 2, 3}, nil)
+	mockDB.GetImageMock.Return(&models.Image{Content: []byte{0, 1, 2, 3}}, nil)
 	srv := app.New(mockDB)
 
 	ctx := context.Background()

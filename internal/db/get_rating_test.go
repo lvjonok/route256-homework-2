@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
+	"gitlab.ozon.dev/lvjonok/homework-2/internal/db"
 	"gitlab.ozon.dev/lvjonok/homework-2/internal/models"
 )
 
@@ -50,4 +51,10 @@ func TestGetRating(t *testing.T) {
 	require.Equal(t, 2, res.Position)
 	require.Equal(t, 3, res.All)
 
+}
+
+func TestGetRatingNotFound(t *testing.T) {
+	client, ctx := Prepare(t)
+	_, err := client.GetRating(ctx, 123456)
+	require.Equal(t, db.ErrNotFound, err)
 }

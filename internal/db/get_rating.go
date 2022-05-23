@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/jackc/pgx/v4"
 	m "gitlab.ozon.dev/lvjonok/homework-2/internal/models"
 )
 
@@ -22,6 +23,9 @@ func (c *Client) GetRating(ctx context.Context, chatID m.ID) (*m.Rating, error) 
 
 	err := c.pool.QueryRow(ctx, query, chatID).Scan(&position, &all)
 	if err != nil {
+		if err == pgx.ErrNoRows {
+			return nil, ErrNotFound
+		}
 		return nil, fmt.Errorf("failed to get rating from database, err: %v", err)
 	}
 

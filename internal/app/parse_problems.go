@@ -7,6 +7,7 @@ import (
 	"strings"
 	"sync"
 
+	"gitlab.ozon.dev/lvjonok/homework-2/internal/db"
 	"gitlab.ozon.dev/lvjonok/homework-2/internal/models"
 	"gitlab.ozon.dev/lvjonok/homework-2/internal/parser"
 	"gitlab.ozon.dev/lvjonok/homework-2/internal/svgconv"
@@ -30,7 +31,7 @@ func (s *Service) ParseProblems(ctx context.Context) error {
 	// categories := []*parser.ProblemCategory{{Problem: 3, CategotyId: 112, Title: "some freaky good title"}}
 
 	for _, cat := range categories {
-		categoryDbID, err := s.DB.CreateCategory(ctx, models.Category{
+		categoryDbID, err := s.AddCategory(ctx, &models.Category{
 			CategoryID: models.ID(cat.CategotyId),
 			TaskNumber: cat.Problem,
 			Title:      cat.Title,
@@ -95,7 +96,7 @@ func (s *Service) ParseProblems(ctx context.Context) error {
 					// continue
 				}
 
-				imageId, err := s.DB.CreateImage(ctx, imgbytes, part)
+				imageId, err := s.AddImage(ctx, imgbytes, part) // s.DB.CreateImage(ctx, imgbytes, part)
 				if err != nil {
 					log.Printf("failed to update image in database, %v", err)
 					broke = true
@@ -119,7 +120,7 @@ func (s *Service) ParseProblems(ctx context.Context) error {
 				continue
 			}
 
-			imageId, err := s.DB.CreateImage(ctx, imgbytes, dbproblem.ProblemImage)
+			imageId, err := s.AddImage(ctx, imgbytes, dbproblem.ProblemImage) // s.DB.CreateImage(ctx, imgbytes, dbproblem.ProblemImage)
 			if err != nil {
 				log.Printf("failed to update image in database, %v", err)
 				continue
@@ -127,10 +128,69 @@ func (s *Service) ParseProblems(ctx context.Context) error {
 			dbproblem.ProblemImage = fmt.Sprintf("{%d}", *imageId)
 		}
 
-		if _, err := s.DB.CreateProblem(ctx, dbproblem); err != nil {
+		if _, err := s.AddProblem(ctx, &dbproblem); err != nil {
 			log.Printf("failed to add new problem %v, err: %v", pproblem, err)
 		}
 	}
 
 	return nil
+}
+
+func (s *Service) AddProblem(ctx context.Context, dbproblem *models.Problem) (*models.ID, error) {
+	oldProblem, err := s.DB.GetProblemByProblemID(ctx, dbproblem.ProblemID)
+	if err != nil && err != db.ErrNotFound {
+		return nil, fmt.Errorf("failed to check old problem, err: <%v>", err)
+	}
+
+	// check if we do not have to create new problem in database
+	if err != db.ErrNotFound && oldProblem.Equal(dbproblem) {
+		return &oldProblem.ID, nil
+	}
+
+	pID, err := s.DB.CreateProblem(ctx, *dbproblem)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create problem, err: <%v>", err)
+	}
+
+	return pID, nil
+}
+
+func (s *Service) AddImage(ctx context.Context, img []byte, link string) (*models.ID, error) {
+	// try to get old image
+	oldImage, err := s.DB.GetImageByHref(ctx, link)
+	if err != nil && err != db.ErrNotFound {
+		return nil, fmt.Errorf("failed to check old image, err: <%v>", err)
+	}
+
+	// check if we do not have to create new image in database
+	if err != db.ErrNotFound && oldImage.Equal(&models.Image{Content: img, Href: link}) {
+		return &oldImage.ID, nil
+	}
+
+	imgID, cerr := s.DB.CreateImage(ctx, img, link)
+	if cerr != nil {
+		return nil, fmt.Errorf("failed to create image, err: <%v>", err)
+	}
+
+	return imgID, nil
+}
+
+func (s *Service) AddCategory(ctx context.Context, cat *models.Category) (*models.ID, error) {
+	// try to get old category
+	category, err := s.DB.GetCategoryByID(ctx, cat.CategoryID)
+	if err != nil && err != db.ErrNotFound {
+		return nil, fmt.Errorf("failed to check old category, err: <%v>", err)
+	}
+
+	// check if we do not have to add new category
+	if err != db.ErrNotFound && category.Equal(cat) {
+		return &category.ID, nil
+	}
+
+	catID, err := s.DB.CreateCategory(ctx, *cat)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create new category, err: <%v>", err)
+	}
+
+	return catID, nil
 }
