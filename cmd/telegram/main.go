@@ -50,7 +50,10 @@ func main() {
 
 		switch cmd {
 		case "/start":
-			tgClient.SendMessage(chatID, "hello!")
+			if _, err := tgClient.SendMessage(chatID, "hello!"); err != nil {
+				log.Printf("failed to send message, err: <%v>", err)
+			}
+
 		case "/random":
 			resp, err := client.GetRandom(ctx, &homework_2.GetRandomRequest{ChatId: int64(chatID)})
 			if err != nil {
@@ -58,11 +61,15 @@ func main() {
 				continue
 			}
 
-			handleProblemSend(ctx, chatID, tgClient, client, resp.Problem)
+			if err := handleProblemSend(ctx, chatID, tgClient, client, resp.Problem); err != nil {
+				log.Printf("failed to handle problem send, err: <%v>", err)
+			}
 		case "/problem":
 			number, err := strconv.Atoi(params)
 			if err != nil {
-				tgClient.SendMessage(chatID, "do not think that you put number as parameter")
+				if _, err := tgClient.SendMessage(chatID, "do not think that you put number as parameter"); err != nil {
+					log.Printf("failed to send error message, err: <%v>", err)
+				}
 				continue
 			}
 			resp, err := client.GetProblem(ctx, &homework_2.GetProblemRequest{ChatId: int64(chatID), TaskNumber: int64(number)})
@@ -70,8 +77,9 @@ func main() {
 				log.Printf("failed to get random problem, err: %v", err)
 				continue
 			}
-
-			handleProblemSend(ctx, chatID, tgClient, client, resp.Problem)
+			if err := handleProblemSend(ctx, chatID, tgClient, client, resp.Problem); err != nil {
+				log.Printf("failed to handle problem send, err: <%v>", err)
+			}
 		case "/check":
 			answer := params
 			resp, err := client.CheckAnswer(ctx, &homework_2.CheckAnswerRequest{ChatId: int64(chatID), Answer: answer})
@@ -80,7 +88,9 @@ func main() {
 				continue
 			}
 
-			tgClient.SendMessage(chatID, fmt.Sprintf("problem: %v\ncorrect answer: %v\nyour result: %v\n", resp.ProblemId, resp.Answer, resp.Result))
+			if _, err := tgClient.SendMessage(chatID, fmt.Sprintf("problem: %v\ncorrect answer: %v\nyour result: %v\n", resp.ProblemId, resp.Answer, resp.Result)); err != nil {
+				log.Printf("failed to send message, err: <%v>", err)
+			}
 		case "/stat":
 			resp, err := client.GetStat(ctx, &homework_2.GetStatRequest{ChatId: int64(chatID)})
 			if err != nil {
@@ -93,7 +103,9 @@ func main() {
 				msg += fmt.Sprintf("Task %d: %d/%d\n", el.TaskNumber, el.Correct, el.All)
 			}
 
-			tgClient.SendMessage(chatID, msg)
+			if _, err := tgClient.SendMessage(chatID, msg); err != nil {
+				log.Printf("failed to send message, err: <%v>", err)
+			}
 		case "/rating":
 			resp, err := client.GetRating(ctx, &homework_2.GetRatingRequest{ChatId: int64(chatID)})
 			if err != nil {
@@ -104,7 +116,9 @@ func main() {
 			msg := "You rating among all users\n"
 			msg += fmt.Sprintf("Position: %d\nAmong: %d", resp.Position, resp.All)
 
-			tgClient.SendMessage(chatID, msg)
+			if _, err := tgClient.SendMessage(chatID, msg); err != nil {
+				log.Printf("failed to send message, err: <%v>", err)
+			}
 		}
 	}
 }
@@ -123,7 +137,9 @@ func handleProblemSend(ctx context.Context,
 			log.Printf("errored: <%v>", err)
 			return err
 		}
-		tgClient.SendPhoto(chatID, im.Image, "Problem image")
+		if _, err := tgClient.SendPhoto(chatID, im.Image, "Problem image"); err != nil {
+			return fmt.Errorf("failed to send photo, err: <%v>", err)
+		}
 	}
 
 	dl := len(problem.Description)
@@ -135,7 +151,9 @@ func handleProblemSend(ctx context.Context,
 				log.Printf("tried to access image: %v", int64(getImageID(curpart)))
 				log.Printf("errored: <%v>", err)
 			}
-			tgClient.SendPhoto(chatID, im.Image, "additional image")
+			if _, err := tgClient.SendPhoto(chatID, im.Image, "additional image"); err != nil {
+				return fmt.Errorf("failed to send photo, err: <%v>", err)
+			}
 		} else if !isImageID(curpart) {
 			if idx+1 < dl && isImageID(problem.Description[idx+1]) {
 				im, err := client.GetImage(ctx, &homework_2.GetImageRequest{ImageId: int64(getImageID(problem.Description[idx+1]))})
@@ -144,10 +162,14 @@ func handleProblemSend(ctx context.Context,
 					log.Printf("errored: <%v>", err)
 					return err
 				}
-				tgClient.SendPhoto(chatID, im.Image, curpart)
+				if _, err := tgClient.SendPhoto(chatID, im.Image, curpart); err != nil {
+					return fmt.Errorf("failed to send photo, err: <%v>", err)
+				}
 				idx += 1
 			} else {
-				tgClient.SendMessage(chatID, curpart)
+				if _, err := tgClient.SendMessage(chatID, curpart); err != nil {
+					return fmt.Errorf("failed to send message, err: <%v>", err)
+				}
 			}
 		}
 	}

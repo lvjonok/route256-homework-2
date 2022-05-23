@@ -50,7 +50,9 @@ func (c *Client) SendMessage(chatID int, text string) (*Message, error) {
 	defer res.Body.Close()
 
 	var resp Message
-	json.Unmarshal(rawbytes, &resp)
+	if err := json.Unmarshal(rawbytes, &resp); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal response %v, err: <%v>", rawbytes, err)
+	}
 
 	return &resp, nil
 }

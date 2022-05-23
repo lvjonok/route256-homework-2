@@ -117,14 +117,12 @@ func (s *Service) ParseProblems(ctx context.Context) error {
 			if err != nil {
 				log.Printf("failed to convert image part to bytes, err: %v", err)
 				continue
-				return err
 			}
 
 			imageId, err := s.DB.CreateImage(ctx, imgbytes, dbproblem.ProblemImage)
 			if err != nil {
 				log.Printf("failed to update image in database, %v", err)
 				continue
-				return err
 			}
 			dbproblem.ProblemImage = fmt.Sprintf("{%d}", *imageId)
 		}

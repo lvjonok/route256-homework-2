@@ -80,7 +80,9 @@ func (c *Client) getUpdates() (*GetUpdatesResponse, error) {
 	}
 	defer res.Body.Close()
 
-	json.Unmarshal(rawbytes, &jsonRes)
+	if err := json.Unmarshal(rawbytes, &jsonRes); err != nil {
+		return nil, fmt.Errorf("failed to unmarshall response: %v, err: <%v>", rawbytes, err)
+	}
 
 	return &jsonRes, nil
 }

@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"log"
 	"net"
 	"net/http"
@@ -29,7 +28,7 @@ func runRest(cfg *config.Config) {
 	if err != nil {
 		panic(err)
 	}
-	fmt.Printf("run serve rest")
+	log.Printf("run serve rest")
 	if err := http.ListenAndServe(cfg.Server.Host+":"+cfg.Server.RestPort, mux); err != nil {
 		panic(err)
 	}

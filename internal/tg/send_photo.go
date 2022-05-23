@@ -3,6 +3,7 @@ package tg
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"io"
 	"io/ioutil"
 	"log"
@@ -103,7 +104,9 @@ func (c *Client) SendPhoto(chatID int, photoBytes []byte, caption string) (*Mess
 	log.Printf("raw, %v", string(rawbytes))
 
 	var resp MessagePhoto
-	json.Unmarshal(rawbytes, &resp)
+	if err := json.Unmarshal(rawbytes, &resp); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal response %v, err: <%v>", rawbytes, err)
+	}
 
 	return &resp, nil
 }

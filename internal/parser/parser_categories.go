@@ -39,8 +39,7 @@ out:
 			if ok, _ := isProblemSpan(tokens); ok {
 				pb, err := strconv.Atoi(tokenizer.Token().Data)
 				if err != nil {
-					fmt.Println("errored", err)
-					return nil, err
+					return nil, fmt.Errorf("failed to convert to int, err: <%v>", err)
 				}
 				lastProblem = int(pb)
 

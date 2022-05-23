@@ -29,7 +29,10 @@ func (c *Client) GetStat(ctx context.Context, chatID m.ID) (*m.Statistics, error
 
 	for rows.Next() {
 		taskStat := m.TaskStat{}
-		rows.Scan(&taskStat.TaskNumber, &taskStat.Correct, &taskStat.All)
+		err := rows.Scan(&taskStat.TaskNumber, &taskStat.Correct, &taskStat.All)
+		if err != nil {
+			return nil, fmt.Errorf("failed to scan a row, err: <%v>", err)
+		}
 		stat.Stat = append(stat.Stat, taskStat)
 	}
 
