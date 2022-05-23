@@ -26,11 +26,10 @@ func runRest(cfg *config.Config) {
 	opts := []grpc.DialOption{grpc.WithTransportCredentials(insecure.NewCredentials())}
 	err := pb.RegisterMathHelperHandlerFromEndpoint(ctx, mux, cfg.Server.Host+":"+cfg.Server.Port, opts)
 	if err != nil {
-		panic(err)
+		log.Fatalf("failed to register endpoint, err: <%v>", err)
 	}
-	log.Printf("run serve rest")
 	if err := http.ListenAndServe(cfg.Server.Host+":"+cfg.Server.RestPort, mux); err != nil {
-		panic(err)
+		log.Fatalf("failed to listen and serve rest, err: <%v>", err)
 	}
 }
 
@@ -51,18 +50,17 @@ func main() {
 	newServer := app.New(db.New(adp))
 
 	// Parse problems worker
-	go func() {
+	go func(delaySec int64) {
 		for {
 			log.Printf("Worker start")
 			err := newServer.ParseProblems(ctx)
 			if err != nil {
-				log.Printf("WORKER ERROR: <%v>", err)
+				log.Printf("worker encountered err: <%v>", err)
 			}
 			log.Printf("worker finished")
-
-			time.Sleep(time.Hour * 2)
+			time.Sleep(time.Second * time.Duration(delaySec))
 		}
-	}()
+	}(cfg.Parser.DelaySec)
 
 	lis, err := net.Listen("tcp", cfg.Server.Host+":"+cfg.Server.Port)
 	if err != nil {
@@ -76,8 +74,9 @@ func main() {
 	pb.RegisterMathHelperServer(grpcServer, newServer)
 	err = grpcServer.Serve(lis)
 	if err != nil {
-		panic(err)
+		log.Fatalf("failed to serve grpc, err: <%v>", err)
 	}
+
 	for {
 		time.Sleep(time.Second)
 	}

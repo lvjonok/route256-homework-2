@@ -19,6 +19,9 @@ type Config struct {
 		Port     string `yaml:"port"`
 		RestPort string `yaml:"restport"`
 	} `yaml:"server"`
+	Parser struct {
+		DelaySec int64 `yaml:"delay-sec"`
+	} `yaml:"parser"`
 }
 
 func New(filename string) (*Config, error) {

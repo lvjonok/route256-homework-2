@@ -20,7 +20,6 @@ func getImageID(raw string) int {
 }
 
 func isImageID(raw string) bool {
-	// log.Printf("raw is image id %v", raw)
 	return strings.HasSuffix(raw, "}") && strings.HasPrefix(raw, "{")
 }
 
@@ -150,6 +149,7 @@ func handleProblemSend(ctx context.Context,
 			if err != nil {
 				log.Printf("tried to access image: %v", int64(getImageID(curpart)))
 				log.Printf("errored: <%v>", err)
+				return err
 			}
 			if _, err := tgClient.SendPhoto(chatID, im.Image, "additional image"); err != nil {
 				return fmt.Errorf("failed to send photo, err: <%v>", err)

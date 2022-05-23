@@ -10,7 +10,7 @@ import (
 	"google.golang.org/grpc/status"
 )
 
-// ChechAnswer compares last user's pending submission correct answer with given
+// CheckAnswer compares last user's pending submission correct answer with given
 func (s *Service) CheckAnswer(ctx context.Context, req *pb.CheckAnswerRequest) (*pb.CheckAnswerResponse, error) {
 	lastUserSub, err := s.DB.GetLastUserSubmission(ctx, models.ID(req.ChatId))
 	if err == db.ErrNotFound {

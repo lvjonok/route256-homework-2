@@ -6,3 +6,5 @@ server:
   host: localhost
   port: 8080
   restport: 8081
+parser:
+  delay-sec: 7200
